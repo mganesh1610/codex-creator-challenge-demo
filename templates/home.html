@@ -92,9 +92,14 @@
         </div>
       </section>
       <section class="card wide home-freezer-preview-card">
-        <div class="card-head">
-          <h2>Sensor Wall Preview</h2>
-          <p>Current freezer states across the monitored storage network.</p>
+        <div class="card-head card-head-actions">
+          <div>
+            <h2>Sensor Wall Preview</h2>
+            <p>Current freezer states across the monitored storage network.</p>
+          </div>
+          <div class="actions compact home-freezer-preview-actions">
+            <a class="button secondary" href="/freezer-monitoring">Open Freezer Monitoring</a>
+          </div>
         </div>
         <div class="home-freezer-preview-row">
           {% for unit in freezer_overview.preview_units %}

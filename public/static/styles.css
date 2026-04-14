@@ -354,6 +354,13 @@ h1 {
   border-bottom: 1px solid rgba(140, 29, 64, 0.08);
 }
 
+.card-head-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .dropzone {
   position: relative;
   display: grid;
@@ -1354,6 +1361,11 @@ input[type="text"] {
     display: grid;
   }
 
+  .card-head-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .status-stack {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -1391,6 +1403,10 @@ input[type="text"] {
 @media (max-width: 700px) {
   .page-shell {
     padding: 18px 14px 40px;
+  }
+
+  .card-head-actions {
+    align-items: stretch;
   }
 
   .status-stack {
@@ -1957,6 +1973,16 @@ input[type="text"] {
   border-color: rgba(255, 248, 243, 0.14);
   background: rgba(255, 248, 243, 0.1);
   color: #fff8f3;
+}
+
+.home-action-grid .feature-card-meta {
+  gap: 6px;
+}
+
+.home-action-grid .feature-card-meta span {
+  min-height: 32px;
+  padding: 7px 10px;
+  font-size: 0.66rem;
 }
 
 .home-action-grid .actions.compact {

@@ -583,6 +583,14 @@
   margin-bottom: 14px;
 }
 
+.home-freezer-preview-actions {
+  margin-left: auto;
+}
+
+.home-freezer-preview-actions .button {
+  white-space: nowrap;
+}
+
 .home-freezer-preview-row {
   display: grid;
   grid-auto-flow: column;
@@ -710,6 +718,10 @@
 
   .home-freezer-preview-row {
     grid-auto-columns: minmax(240px, 1fr);
+  }
+
+  .home-freezer-preview-actions {
+    margin-left: 0;
   }
 
   .freezer-refresh-now {
