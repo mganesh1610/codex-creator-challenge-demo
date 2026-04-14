@@ -23,7 +23,74 @@
     </header>
     <section class="portal-bar"><div class="portal-profile"><div class="portal-profile-meta"><strong>{{ current_user.display_name or current_user.email }}</strong><span class="portal-profile-email">{{ current_user.email }}</span></div></div><div class="actions compact portal-actions"><span class="study-chip upload">Public Demo Session</span></div></section>
     <main class="dashboard">
-      <section class="card wide"><div class="card-head"><h2>Workspace Entry Points</h2><p>Each module supports a distinct operational step in biospecimen intake, inventory management, cold storage oversight, and reporting.</p></div><div class="home-action-grid"><article class="feature-card feature-card-primary"><span class="feature-kicker">Registry Intake</span><h3>Patient Onboarding</h3><p>Register participants, create visit records, and capture program, phase, and site details before specimens begin moving through intake and storage workflows.</p><div class="actions compact"><a class="button primary" href="/patient-onboarding">Open Patient Onboarding</a></div></article><article class="feature-card"><span class="feature-kicker">Workbook Intake</span><h3>Dataloader</h3><p>Review shipment or collection workbooks from clinics and labs, validate site and date fields, and prepare specimen records for a cleaner import process.</p><div class="actions compact"><a class="button secondary" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a></div></article><article class="feature-card"><span class="feature-kicker">Cold Storage</span><h3>Freezer Monitoring</h3><p>Inspect synthetic alert states, threshold drift, and freezer coverage patterns without exposing any live facility telemetry or temperature history.</p><div class="actions compact"><a class="button secondary" href="/freezer-monitoring">Open Freezer Monitoring</a></div></article><article class="feature-card"><span class="feature-kicker">Operational Questions</span><h3>AI Report Generator</h3><p>Ask plain-language questions about participants, visits, programs, sample types, and disposition trends to produce answers without hand-writing queries.</p><div class="actions compact"><a class="button secondary" href="/reports/ai?mode={{ upload_mode }}">Open AI Reports</a></div></article><article class="feature-card"><span class="feature-kicker">Operations Summary</span><h3>Dashboard</h3><p>Monitor program activity, visit throughput, inventory volume, and freezer readiness in one reporting view for coordinators, lab operations, and study leadership.</p><div class="actions compact"><a class="button secondary" href="/reports/dashboard?mode={{ upload_mode }}">Open Dashboard</a></div></article></div></section>
+      <section class="card wide">
+        <div class="card-head">
+          <h2>Workspace Entry Points</h2>
+          <p>Core modules for intake, workbook review, cold storage oversight, and reporting.</p>
+        </div>
+        <div class="home-action-grid">
+          <article class="feature-card feature-card-primary">
+            <span class="feature-kicker">Registry Intake</span>
+            <h3>Patient Onboarding</h3>
+            <p>Create participant and visit records before specimens enter intake.</p>
+            <div class="feature-card-meta">
+              <span>New visits</span>
+              <span>Sites and phases</span>
+            </div>
+            <div class="actions compact">
+              <a class="button primary" href="/patient-onboarding">Start Intake</a>
+            </div>
+          </article>
+          <article class="feature-card">
+            <span class="feature-kicker">Workbook Intake</span>
+            <h3>Dataloader</h3>
+            <p>Review workbook uploads, map fields, and stage clean imports.</p>
+            <div class="feature-card-meta">
+              <span>Workbook QC</span>
+              <span>Field mapping</span>
+            </div>
+            <div class="actions compact">
+              <a class="button secondary" href="/dataloader?mode={{ upload_mode }}">Review Uploads</a>
+            </div>
+          </article>
+          <article class="feature-card">
+            <span class="feature-kicker">Cold Storage</span>
+            <h3>Freezer Monitoring</h3>
+            <p>Track synthetic freezer status, alert drift, and storage readiness.</p>
+            <div class="feature-card-meta">
+              <span>Alert wall</span>
+              <span>Synthetic telemetry</span>
+            </div>
+            <div class="actions compact">
+              <a class="button secondary" href="/freezer-monitoring">Monitor Storage</a>
+            </div>
+          </article>
+          <article class="feature-card">
+            <span class="feature-kicker">Operational Questions</span>
+            <h3>AI Report Generator</h3>
+            <p>Ask operational questions without writing filters or queries.</p>
+            <div class="feature-card-meta">
+              <span>Plain language</span>
+              <span>Study reporting</span>
+            </div>
+            <div class="actions compact">
+              <a class="button secondary" href="/reports/ai?mode={{ upload_mode }}">Ask Questions</a>
+            </div>
+          </article>
+          <article class="feature-card">
+            <span class="feature-kicker">Operations Summary</span>
+            <h3>Dashboard</h3>
+            <p>See program volume, visit activity, and freezer status in one view.</p>
+            <div class="feature-card-meta">
+              <span>Program KPIs</span>
+              <span>Readiness view</span>
+            </div>
+            <div class="actions compact">
+              <a class="button secondary" href="/reports/dashboard?mode={{ upload_mode }}">View Summary</a>
+            </div>
+          </article>
+        </div>
+      </section>
       <section class="card wide"><div class="card-head"><h2>Operational Snapshot</h2><p>These counts give teams a quick read on program coverage, site footprint, participant volume, visit activity, and specimen inventory scale.</p></div><div class="metric-grid">{% for metric in database_overview.metrics %}<article class="metric-card"><span class="banner-label">{{ metric.label }}</span><strong>{{ metric.value }}</strong><p>{{ metric.detail }}</p></article>{% endfor %}</div></section>
       <section class="card wide"><div class="card-head"><h2>Study Breakdown</h2><p>Compare participant, visit, and sample volume across active studies to understand workload and inventory distribution.</p></div><div class="table-wrap"><table class="mini-table"><thead><tr><th>Study</th><th>Patients</th><th>Visits</th><th>Samples</th></tr></thead><tbody>{% for row in database_overview.study_breakdown %}<tr><td>{{ row.study_code }}</td><td>{{ row.patient_count }}</td><td>{{ row.visit_count }}</td><td>{{ row.sample_count }}</td></tr>{% endfor %}</tbody></table></div></section>
       <section class="card wide"><div class="card-head"><h2>Cold Storage Snapshot</h2><p>The public-safe freezer module uses synthetic telemetry patterns to model alerting and capacity planning without any live building data.</p></div><div class="home-split"><div><div class="metric-grid">{% for metric in freezer_overview.metrics %}<article class="metric-card"><span class="banner-label">{{ metric.label }}</span><strong>{{ metric.value }}</strong><p>{{ metric.detail }}</p></article>{% endfor %}</div><div class="chip-row">{% for code in freezer_overview.study_codes %}<span class="study-chip upload">{{ code }}</span>{% endfor %}</div><div class="actions compact"><a class="button secondary" href="/freezer-monitoring">Open Freezer Monitoring</a></div></div><div><div class="table-wrap"><table class="mini-table"><thead><tr><th>Freezer</th><th>Building</th><th>Status</th><th>Temp</th></tr></thead><tbody>{% for alert in freezer_overview.alerts %}<tr><td>{{ alert.display_id }}</td><td>{{ alert.building_name }}</td><td>{{ alert.status_label }}</td><td>{% if alert.reading is not none %}{{ "%.1f"|format(alert.reading) }} {{ alert.units }}{% else %}--{% endif %}</td></tr>{% endfor %}</tbody></table></div></div></div></section>
