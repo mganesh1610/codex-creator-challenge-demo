@@ -208,6 +208,7 @@ h1 {
   flex-direction: column;
   gap: 10px;
   min-width: 220px;
+  width: min(100%, 240px);
 }
 
 .status-chip {
@@ -219,7 +220,9 @@ h1 {
   padding: 10px 14px;
   background: rgba(255, 255, 255, 0.66);
   font-size: 0.95rem;
+  line-height: 1.15;
   text-align: center;
+  width: 100%;
 }
 
 .status-chip-link {
@@ -1351,6 +1354,13 @@ input[type="text"] {
     display: grid;
   }
 
+  .status-stack {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    width: 100%;
+    min-width: 0;
+  }
+
   .header-mapping-grid {
     grid-template-columns: 1fr;
   }
@@ -1381,6 +1391,10 @@ input[type="text"] {
 @media (max-width: 700px) {
   .page-shell {
     padding: 18px 14px 40px;
+  }
+
+  .status-stack {
+    grid-template-columns: 1fr;
   }
 
   .portal-bar {
@@ -1916,23 +1930,27 @@ input[type="text"] {
 .feature-card-meta {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 8px;
 }
 
 .feature-card-meta span {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-height: 0;
-  padding: 7px 10px;
-  border-radius: 14px;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 999px;
   border: 1px solid rgba(140, 29, 64, 0.1);
   background: rgba(140, 29, 64, 0.05);
   color: var(--accent-dark);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0.05em;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .feature-card-primary .feature-card-meta span {
