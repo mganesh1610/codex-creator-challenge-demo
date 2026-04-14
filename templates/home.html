@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ app_title }} | Home</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Public Demo Workspace</p>
+        <h1>{{ app_title }}</h1>
+        <p class="hero-copy">This homepage summarizes the public demo dataset, highlights the main workflows, and opens directly without a private sign-in.</p>
+      </div>
+      <div class="status-stack">
+        <span class="status-chip ready">Public Demo Mode</span>
+        <a class="status-chip ready status-chip-link" href="/patient-onboarding">Patient Onboarding</a>
+        <a class="status-chip ready status-chip-link" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a>
+      </div>
+    </header>
+    <section class="portal-bar"><div><strong>{{ current_user.display_name or current_user.email }}</strong><span>{{ current_user.email }}</span></div><div class="actions compact portal-actions"><span class="study-chip upload">Public Demo Session</span></div></section>
+    <nav class="mode-nav">{% for item in primary_nav %}<a class="mode-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>{% endfor %}</nav>
+    <section class="runtime-banner" id="runtime-banner"></section>
+    <section class="access-strip"><div class="access-card"><span class="banner-label">Program Access</span><div class="chip-row">{% for access in user_access_scope.study_access %}<span class="study-chip upload">{{ access.study_code }} | Demo Access</span>{% endfor %}</div></div></section>
+    <main class="dashboard">
+      <section class="card wide"><div class="card-head"><h2>Workspace Entry Points</h2><p>The public demo is organized around a shared homepage and dedicated workflow modules.</p></div><div class="home-action-grid"><article class="feature-card feature-card-primary"><span class="feature-kicker">New Entry</span><h3>Patient Onboarding</h3><p>Create synthetic patient and visit records directly in the demo registry before any sample inventory is loaded.</p><div class="actions compact"><a class="button primary" href="/patient-onboarding">Open Patient Onboarding</a></div></article><article class="feature-card"><span class="feature-kicker">Workbook Intake</span><h3>Dataloader</h3><p>Preview retained or shared workbook flows from one loader page. Imports are simulated against the public demo dataset.</p><div class="actions compact"><a class="button secondary" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a></div></article><article class="feature-card"><span class="feature-kicker">Natural Language Queries</span><h3>AI Report Generator</h3><p>Query the synthetic dataset in plain English and inspect the deterministic demo query plan.</p><div class="actions compact"><a class="button secondary" href="/reports/ai?mode={{ upload_mode }}">Open AI Reports</a></div></article><article class="feature-card"><span class="feature-kicker">Summary View</span><h3>Dashboard</h3><p>Review the same public demo metrics in a dedicated reporting view without any private embeds.</p><div class="actions compact"><a class="button secondary" href="/reports/dashboard?mode={{ upload_mode }}">Open Dashboard</a></div></article></div></section>
+      <section class="card wide"><div class="card-head"><h2>Demo Dataset Snapshot</h2><p>The counts below summarize the synthetic public dataset across registry, visit, and sample inventory domains.</p></div><div class="metric-grid">{% for metric in database_overview.metrics %}<article class="metric-card"><span class="banner-label">{{ metric.label }}</span><strong>{{ metric.value }}</strong><p>{{ metric.detail }}</p></article>{% endfor %}</div></section>
+      <section class="card wide"><div class="card-head"><h2>Program Breakdown</h2><p>Synthetic counts grouped by demo program.</p></div><div class="table-wrap"><table class="mini-table"><thead><tr><th>Program</th><th>Patients</th><th>Visits</th><th>Samples</th></tr></thead><tbody>{% for row in database_overview.study_breakdown %}<tr><td>{{ row.study_code }}</td><td>{{ row.patient_count }}</td><td>{{ row.visit_count }}</td><td>{{ row.sample_count }}</td></tr>{% endfor %}</tbody></table></div></section>
+      <section class="card wide"><div class="card-head"><h2>Schema Analysis</h2><p>The public demo is organized into four generic operational zones.</p></div><div class="home-split"><div><h3>Core Domains</h3><div class="schema-grid">{% for area in database_overview.schema_areas %}<article class="schema-card"><h3>{{ area.title }}</h3><p>{{ area.description }}</p><div class="chip-row">{% for table_name in area.tables %}<span class="study-chip">{{ table_name }}</span>{% endfor %}</div></article>{% endfor %}</div></div><div><h3>Disposition Mix</h3><div class="table-wrap"><table class="mini-table"><thead><tr><th>Disposition</th><th>Samples</th></tr></thead><tbody>{% for row in database_overview.disposition_breakdown %}<tr><td>{{ row.disposition_code }}</td><td>{{ row.sample_count }}</td></tr>{% endfor %}</tbody></table></div></div></div></section>
+    </main>
+  </div>
+  <script>
+    window.APP_PAGE = "home";
+    window.FIELD_CATALOG = {{ field_catalog_json | safe }};
+    window.HEADER_MAPPING_OPTIONS = {{ header_mapping_options_json | safe }};
+    window.RUNTIME_STATUS = {{ runtime_status_json | safe }};
+    window.UPLOAD_MODE = {{ upload_mode | tojson }};
+    window.UPLOAD_MODE_LABEL = {{ upload_mode_label | tojson }};
+  </script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

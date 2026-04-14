@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>{{ app_title }} | AI Report Generator</title><link rel="stylesheet" href="/static/styles.css" /></head>
+<body>
+  <div class="page-shell">
+    <header class="hero"><div><p class="eyebrow">AI Reporting Workspace</p><h1>AI Report Generator</h1><p class="hero-copy">Ask questions in plain English, review the output table, and inspect the deterministic query plan generated for the public demo dataset.</p></div><div class="status-stack"><a class="status-chip ready status-chip-link" href="/">Home</a><a class="status-chip ready status-chip-link" href="/patient-onboarding">Patient Onboarding</a><a class="status-chip ready status-chip-link" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a><a class="status-chip ready status-chip-link" href="/reports/dashboard?mode={{ upload_mode }}">Dashboard</a></div></header>
+    <section class="portal-bar"><div><strong>{{ current_user.display_name or current_user.email }}</strong><span>{{ current_user.email }}</span></div><div class="actions compact portal-actions"><span class="study-chip upload">Public Demo Session</span></div></section>
+    <nav class="mode-nav">{% for item in primary_nav %}<a class="mode-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>{% endfor %}</nav>
+    <section class="runtime-banner" id="runtime-banner"></section>
+    <section class="access-strip"><div class="access-card"><span class="banner-label">Program Access</span><div class="chip-row">{% for access in user_access_scope.study_access %}<span class="study-chip upload">{{ access.study_code }} | Demo Access</span>{% endfor %}</div></div></section>
+    <main class="dashboard">
+      <section class="card wide"><div class="card-head"><h2>Ask The Query Agent</h2><p>Select the fields you care about, then ask in plain English. The public demo uses a deterministic query plan against synthetic records.</p></div><div id="query-agent-state"></div><div class="study-filter-block"><span class="label-inline">Query programs</span><div class="chip-row" id="query-study-filters"></div></div><div class="query-layout"><div><label class="label" for="question">Question</label><textarea id="question" rows="5" placeholder="Example: Show me retained plasma samples collected in 2026."></textarea><div class="query-action-row"><button class="button primary" id="query-button" type="button">Generate / Run Query</button><button class="button secondary" id="grounded-answer-button" type="button">Grounded Answer</button></div></div><div><div class="label">Selectable Fields</div><div class="field-grid">{% for field in field_catalog %}<label class="field-pill"><input type="checkbox" value="{{ field.key }}" {% if loop.index <= 8 %}checked{% endif %}/><span>{{ field.label }}</span><small>{{ field.category }}</small></label>{% endfor %}</div></div></div></section>
+      <section class="card wide"><div class="card-head"><h2>Grounded Answer</h2><p>The grounded path summarizes only the synthetic records selected for the current public demo question.</p></div><p class="status-text" id="grounded-status">Grounded answer path idle.</p><div class="query-meta" id="grounded-meta"></div><div class="query-explanation" id="grounded-notes"></div><pre class="grounded-answer-box" id="grounded-answer-box">No grounded answer generated yet.</pre><details class="context-panel"><summary>Retrieved Context</summary><pre class="grounded-context-box" id="grounded-context-box">No context retrieved yet.</pre></details></section>
+      <section class="card wide"><div class="card-head"><h2>Report Output</h2><p>The result table below shows the rows returned by the public demo query plan.</p></div><p class="status-text" id="query-status">Query agent idle.</p><div class="query-meta" id="query-meta"></div><div class="query-explanation" id="query-explanation"></div><div class="table-wrap"><table id="results-table"></table></div></section>
+      <section class="card wide"><div class="card-head"><h2>Generated Plan</h2><p>The report agent always shows the execution plan it used.</p></div><pre class="sql-box" id="sql-box">No query generated yet.</pre></section>
+    </main>
+  </div>
+  <script>
+    window.APP_PAGE = "ai_report";
+    window.FIELD_CATALOG = {{ field_catalog_json | safe }};
+    window.HEADER_MAPPING_OPTIONS = {{ header_mapping_options_json | safe }};
+    window.RUNTIME_STATUS = {{ runtime_status_json | safe }};
+    window.UPLOAD_MODE = {{ upload_mode | tojson }};
+    window.UPLOAD_MODE_LABEL = {{ upload_mode_label | tojson }};
+  </script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

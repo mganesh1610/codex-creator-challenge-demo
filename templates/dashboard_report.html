@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ app_title }} | Dashboard</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Public Reporting View</p>
+        <h1>Dashboard</h1>
+        <p class="hero-copy">A dedicated reporting page for the synthetic public dataset, with no private embeds, external dashboards, or backend dependencies.</p>
+      </div>
+      <div class="status-stack">
+        <span class="status-chip ready">Synthetic Data Only</span>
+        <a class="status-chip ready status-chip-link" href="/">Home</a>
+        <a class="status-chip ready status-chip-link" href="/patient-onboarding">Patient Onboarding</a>
+        <a class="status-chip ready status-chip-link" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a>
+      </div>
+    </header>
+
+    <section class="portal-bar">
+      <div>
+        <strong>{{ current_user.display_name or current_user.email }}</strong>
+        <span>{{ current_user.email }}</span>
+      </div>
+      <div class="actions compact portal-actions">
+        <span class="study-chip upload">Public Demo Session</span>
+      </div>
+    </section>
+
+    <nav class="mode-nav">
+      {% for item in primary_nav %}
+      <a class="mode-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>
+      {% endfor %}
+    </nav>
+
+    <section class="runtime-banner" id="runtime-banner"></section>
+    <section class="access-strip">
+      <div class="access-card">
+        <span class="banner-label">Program Access</span>
+        <div class="chip-row">
+          {% for access in user_access_scope.study_access %}
+          <span class="study-chip upload">{{ access.study_code }} | Demo Access</span>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <main class="dashboard">
+      <section class="card wide">
+        <div class="card-head">
+          <h2>Reporting Snapshot</h2>
+          <p>These headline metrics are generated from the in-memory public demo dataset.</p>
+        </div>
+        <div class="metric-grid">
+          {% for metric in database_overview.metrics %}
+          <article class="metric-card">
+            <span class="banner-label">{{ metric.label }}</span>
+            <strong>{{ metric.value }}</strong>
+            <p>{{ metric.detail }}</p>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="card wide">
+        <div class="card-head">
+          <h2>Program Breakdown</h2>
+          <p>Patient, visit, and sample totals grouped by synthetic program.</p>
+        </div>
+        <div class="table-wrap">
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Program</th>
+                <th>Patients</th>
+                <th>Visits</th>
+                <th>Samples</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in database_overview.study_breakdown %}
+              <tr>
+                <td>{{ row.study_code }}</td>
+                <td>{{ row.patient_count }}</td>
+                <td>{{ row.visit_count }}</td>
+                <td>{{ row.sample_count }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card wide">
+        <div class="card-head">
+          <h2>Recent Patient Activity</h2>
+          <p>Newest synthetic onboarding and visit records currently visible in the public demo session.</p>
+        </div>
+        <div class="table-wrap">
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Patient ID</th>
+                <th>Program</th>
+                <th>Visit</th>
+                <th>Site</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for visit in recent_visits %}
+              <tr>
+                <td>{{ visit.patient_id }}</td>
+                <td>{{ visit.study_code }}</td>
+                <td>{{ visit.visit_label }}</td>
+                <td>{{ visit.site_name }}</td>
+                <td>{{ visit.visit_date }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card wide">
+        <div class="card-head">
+          <h2>Data Domains</h2>
+          <p>The public clone keeps the workflow split into generic registry, program, site, and inventory domains.</p>
+        </div>
+        <div class="home-split">
+          <div>
+            <h3>Core Areas</h3>
+            <div class="schema-grid">
+              {% for area in database_overview.schema_areas %}
+              <article class="schema-card">
+                <h3>{{ area.title }}</h3>
+                <p>{{ area.description }}</p>
+                <div class="chip-row">
+                  {% for table_name in area.tables %}
+                  <span class="study-chip">{{ table_name }}</span>
+                  {% endfor %}
+                </div>
+              </article>
+              {% endfor %}
+            </div>
+          </div>
+          <div>
+            <h3>Disposition Mix</h3>
+            <div class="table-wrap">
+              <table class="mini-table">
+                <thead>
+                  <tr>
+                    <th>Disposition</th>
+                    <th>Samples</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in database_overview.disposition_breakdown %}
+                  <tr>
+                    <td>{{ row.disposition_code }}</td>
+                    <td>{{ row.sample_count }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    window.APP_PAGE = "dashboard";
+    window.FIELD_CATALOG = {{ field_catalog_json | safe }};
+    window.HEADER_MAPPING_OPTIONS = {{ header_mapping_options_json | safe }};
+    window.RUNTIME_STATUS = {{ runtime_status_json | safe }};
+    window.UPLOAD_MODE = {{ upload_mode | tojson }};
+    window.UPLOAD_MODE_LABEL = {{ upload_mode_label | tojson }};
+  </script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
