@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ app_title }} | Freezer Monitoring</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="stylesheet" href="/static/freezer.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Public Cold Storage Demo</p>
+        <h1>Freezer Monitoring</h1>
+        <p class="hero-copy">A public-safe freezer command center modeled on the private monitoring workflow, rebuilt entirely with synthetic telemetry, synthetic alert states, and zero live facility integrations.</p>
+      </div>
+      <div class="status-stack">
+        <a class="status-chip ready status-chip-link" href="/">Home</a>
+        <a class="status-chip ready status-chip-link" href="/reports/dashboard?mode={{ upload_mode }}">Dashboard</a>
+        <span class="status-chip current">Freezer Monitoring</span>
+      </div>
+    </header>
+
+    <section class="portal-bar">
+      <div class="portal-profile">
+        <div class="portal-profile-meta">
+          <strong>{{ current_user.display_name or current_user.email }}</strong>
+          <span class="portal-profile-email">{{ current_user.email }}</span>
+        </div>
+      </div>
+      <div class="actions compact portal-actions">
+        <span class="study-chip upload">Synthetic Telemetry Only</span>
+      </div>
+    </section>
+
+    <nav class="mode-nav">
+      {% for item in primary_nav %}
+      <a class="mode-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>
+      {% endfor %}
+    </nav>
+
+    <section class="access-strip">
+      <div class="access-card">
+        <span class="banner-label">Scope</span>
+        <p class="freezer-intro-copy">The monitoring layout mirrors the private freezer tracker, but every unit, threshold, building, and reading on this page is generated for the public demo.</p>
+        <div class="chip-row">
+          {% for code in freezer_overview.study_codes %}
+          <span class="study-chip upload">{{ code }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="freezer-summary-strip" id="freezer-summary-strip"></section>
+
+    <section class="freezer-controls">
+      <div class="freezer-control">
+        <label for="freezer-search">Search</label>
+        <input id="freezer-search" type="search" placeholder="Freezer ID, zone, study, specimen focus" />
+      </div>
+      <div class="freezer-control">
+        <label for="freezer-status-filter">Status</label>
+        <select id="freezer-status-filter">
+          <option value="all">All units</option>
+          <option value="critical">Critical only</option>
+          <option value="warning">Warnings only</option>
+          <option value="stale">Stale only</option>
+          <option value="no_feed">Manual review</option>
+          <option value="normal">Normal only</option>
+        </select>
+      </div>
+      <div class="freezer-control">
+        <label for="freezer-zone-filter">Zone</label>
+        <select id="freezer-zone-filter">
+          <option value="all">All zones</option>
+        </select>
+      </div>
+      <div class="freezer-control">
+        <label for="freezer-building-filter">Building</label>
+        <select id="freezer-building-filter">
+          <option value="all">All buildings</option>
+        </select>
+      </div>
+      <div class="freezer-control">
+        <label for="freezer-study-filter">Program</label>
+        <select id="freezer-study-filter">
+          <option value="all">All programs</option>
+        </select>
+      </div>
+      <div class="freezer-control">
+        <label for="freezer-sort-by">Sort</label>
+        <select id="freezer-sort-by">
+          <option value="severity">Severity</option>
+          <option value="building">Building</option>
+          <option value="temperature">Temperature</option>
+          <option value="freshness">Freshness</option>
+          <option value="capacity">Inventory load</option>
+        </select>
+      </div>
+      <div class="freezer-control">
+        <label for="freezer-refresh-interval">Refresh interval</label>
+        <select id="freezer-refresh-interval">
+          <option value="300000">5 min</option>
+          <option value="900000" selected>15 min</option>
+          <option value="1800000">30 min</option>
+        </select>
+      </div>
+      <div class="freezer-control freezer-mode-control">
+        <label>Refresh mode</label>
+        <div class="freezer-mode-toggle">
+          <button class="freezer-mode-button active" id="freezer-auto-refresh" type="button">Auto</button>
+          <button class="freezer-mode-button" id="freezer-manual-refresh" type="button">Manual</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="freezer-quick-status">
+      <article class="freezer-status-card">
+        <span class="banner-label">Last Refresh</span>
+        <strong id="freezer-last-refresh">Loading...</strong>
+      </article>
+      <article class="freezer-status-card">
+        <span class="banner-label">Data Mode</span>
+        <strong id="freezer-data-mode">Synthetic demo</strong>
+      </article>
+      <article class="freezer-status-card">
+        <span class="banner-label">Refresh Mode</span>
+        <strong id="freezer-refresh-label">Auto</strong>
+      </article>
+      <article class="freezer-status-card">
+        <span class="banner-label">Programs Linked</span>
+        <strong>{{ freezer_overview.study_codes | join(", ") }}</strong>
+      </article>
+    </section>
+
+    <main class="freezer-grid">
+      <section class="freezer-panel">
+        <div class="freezer-panel-head">
+          <h2>Active Alerts</h2>
+          <span id="freezer-alert-count">0</span>
+        </div>
+        <div class="freezer-alert-list" id="freezer-alert-list"></div>
+      </section>
+
+      <section class="freezer-panel freezer-panel-wide">
+        <div class="freezer-panel-head">
+          <h2>Sensor Wall</h2>
+          <span id="freezer-wall-count">0 units</span>
+        </div>
+        <div class="freezer-sensor-wall" id="freezer-sensor-wall"></div>
+      </section>
+
+      <aside class="freezer-panel">
+        <div class="freezer-panel-head">
+          <h2>Selected Freezer</h2>
+          <span id="freezer-detail-badge">Pick a unit</span>
+        </div>
+        <div class="freezer-detail-card freezer-detail-empty" id="freezer-detail-card">Select a freezer tile or alert row to inspect the synthetic reading, threshold band, study coverage, and recent temperature trend.</div>
+      </aside>
+
+      <section class="freezer-panel freezer-panel-wide">
+        <div class="freezer-panel-head">
+          <h2>Operations Table</h2>
+          <span>Quick scan</span>
+        </div>
+        <div class="freezer-table-wrap" id="freezer-table-wrap">
+          <table class="freezer-table">
+            <thead>
+              <tr>
+                <th>Freezer</th>
+                <th>Building / Zone</th>
+                <th>Programs</th>
+                <th>Specimens</th>
+                <th>Temp</th>
+                <th>Limits</th>
+                <th>Status</th>
+                <th>Age</th>
+              </tr>
+            </thead>
+            <tbody id="freezer-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <button class="freezer-refresh-now hidden" id="freezer-refresh-now" type="button">Refresh Now</button>
+  <script src="/static/freezer.js"></script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 ﻿from __future__ import annotations
 
 import os
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -26,6 +27,28 @@ def env_bool(name: str, default: bool = False) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def resolve_cache_dir() -> Path:
+    override = os.getenv("CACHE_DIR")
+    candidates: list[Path] = []
+    if override:
+        candidates.append(Path(override))
+    if os.getenv("VERCEL"):
+        candidates.append(Path(os.getenv("TMPDIR") or tempfile.gettempdir()) / "biospecimen-inventory-mapper-cache")
+    candidates.append(ROOT_DIR / ".cache")
+
+    last_error: OSError | None = None
+    for candidate in candidates:
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+            return candidate
+        except OSError as exc:
+            last_error = exc
+
+    if last_error is not None:
+        raise last_error
+    raise OSError("Unable to create a writable cache directory.")
 
 
 @dataclass(frozen=True)
@@ -67,10 +90,9 @@ class Settings:
 def get_settings() -> Settings:
     load_env_file(ROOT_DIR / ".env.example")
     load_env_file(ROOT_DIR / ".env", overwrite=True)
-    cache_dir = ROOT_DIR / ".cache"
-    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_dir = resolve_cache_dir()
     return Settings(
-        app_title=os.getenv("APP_TITLE", "Codex Creator Challenge Demo"),
+        app_title=os.getenv("APP_TITLE", "Biospecimen Inventory Mapper"),
         app_base_url=os.getenv("APP_BASE_URL", "http://127.0.0.1:8000"),
         public_demo_mode=env_bool("PUBLIC_DEMO_MODE", True),
         public_demo_user_name=os.getenv("PUBLIC_DEMO_USER_NAME", "Public Demo User"),

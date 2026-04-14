@@ -15,17 +15,20 @@
         <p class="hero-copy">A dedicated reporting page for the synthetic public dataset, with no private embeds, external dashboards, or backend dependencies.</p>
       </div>
       <div class="status-stack">
-        <span class="status-chip ready">Synthetic Data Only</span>
         <a class="status-chip ready status-chip-link" href="/">Home</a>
         <a class="status-chip ready status-chip-link" href="/patient-onboarding">Patient Onboarding</a>
         <a class="status-chip ready status-chip-link" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a>
+        <a class="status-chip ready status-chip-link" href="/freezer-monitoring">Freezer Monitoring</a>
+        <span class="status-chip current">Dashboard</span>
       </div>
     </header>
 
     <section class="portal-bar">
-      <div>
-        <strong>{{ current_user.display_name or current_user.email }}</strong>
-        <span>{{ current_user.email }}</span>
+      <div class="portal-profile">
+        <div class="portal-profile-meta">
+          <strong>{{ current_user.display_name or current_user.email }}</strong>
+          <span class="portal-profile-email">{{ current_user.email }}</span>
+        </div>
       </div>
       <div class="actions compact portal-actions">
         <span class="study-chip upload">Public Demo Session</span>
@@ -37,18 +40,6 @@
       <a class="mode-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>
       {% endfor %}
     </nav>
-
-    <section class="runtime-banner" id="runtime-banner"></section>
-    <section class="access-strip">
-      <div class="access-card">
-        <span class="banner-label">Program Access</span>
-        <div class="chip-row">
-          {% for access in user_access_scope.study_access %}
-          <span class="study-chip upload">{{ access.study_code }} | Demo Access</span>
-          {% endfor %}
-        </div>
-      </div>
-    </section>
 
     <main class="dashboard">
       <section class="card wide">
@@ -69,14 +60,66 @@
 
       <section class="card wide">
         <div class="card-head">
-          <h2>Program Breakdown</h2>
-          <p>Patient, visit, and sample totals grouped by synthetic program.</p>
+          <h2>Cold Storage Snapshot</h2>
+          <p>Synthetic freezer monitoring highlights alert pressure and storage coverage without exposing any live telemetry or protected facility context.</p>
+        </div>
+        <div class="home-split">
+          <div>
+            <div class="metric-grid">
+              {% for metric in freezer_overview.metrics %}
+              <article class="metric-card">
+                <span class="banner-label">{{ metric.label }}</span>
+                <strong>{{ metric.value }}</strong>
+                <p>{{ metric.detail }}</p>
+              </article>
+              {% endfor %}
+            </div>
+            <div class="chip-row">
+              {% for code in freezer_overview.study_codes %}
+              <span class="study-chip upload">{{ code }}</span>
+              {% endfor %}
+            </div>
+            <div class="actions compact">
+              <a class="button secondary" href="/freezer-monitoring">Open Freezer Monitoring</a>
+            </div>
+          </div>
+          <div>
+            <div class="table-wrap">
+              <table class="mini-table">
+                <thead>
+                  <tr>
+                    <th>Freezer</th>
+                    <th>Building</th>
+                    <th>Status</th>
+                    <th>Temp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for alert in freezer_overview.alerts %}
+                  <tr>
+                    <td>{{ alert.display_id }}</td>
+                    <td>{{ alert.building_name }}</td>
+                    <td>{{ alert.status_label }}</td>
+                    <td>{% if alert.reading is not none %}{{ "%.1f"|format(alert.reading) }} {{ alert.units }}{% else %}--{% endif %}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card wide">
+        <div class="card-head">
+          <h2>Study Breakdown</h2>
+          <p>Patient, visit, and sample totals grouped by study.</p>
         </div>
         <div class="table-wrap">
           <table class="mini-table">
             <thead>
               <tr>
-                <th>Program</th>
+                <th>Study</th>
                 <th>Patients</th>
                 <th>Visits</th>
                 <th>Samples</th>
@@ -117,9 +160,9 @@
               <tr>
                 <td>{{ visit.patient_id }}</td>
                 <td>{{ visit.study_code }}</td>
-                <td>{{ visit.visit_label }}</td>
+                <td>{{ visit.patient_visit_label }}</td>
                 <td>{{ visit.site_name }}</td>
-                <td>{{ visit.visit_date }}</td>
+                <td>{{ visit.obtained_date }}</td>
               </tr>
               {% endfor %}
             </tbody>

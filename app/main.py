@@ -18,10 +18,20 @@ from openpyxl import Workbook
 from pydantic import BaseModel, Field
 
 from .config import ROOT_DIR, get_settings
+from .freezer_demo import (
+    build_freezer_dashboard_payload,
+    build_freezer_detail_payload,
+    build_freezer_overview,
+)
 
 settings = get_settings()
 app = FastAPI(title=settings.app_title)
-app.mount("/static", StaticFiles(directory=ROOT_DIR / "static"), name="static")
+public_static_dir = ROOT_DIR / "public" / "static"
+legacy_static_dir = ROOT_DIR / "static"
+if public_static_dir.exists():
+    app.mount("/static", StaticFiles(directory=public_static_dir), name="static")
+elif legacy_static_dir.exists():
+    app.mount("/static", StaticFiles(directory=legacy_static_dir), name="static")
 templates = Jinja2Templates(directory=str(ROOT_DIR / "templates"))
 
 DEFAULT_UPLOAD_MODE = "kept"
@@ -54,7 +64,7 @@ SCHEMA_AREAS = [
     {"title": "Participant Registry", "tables": ["Participants", "Visits", "Visit labels"], "description": "Tracks patient identity and visit progression in the public demo dataset."},
     {"title": "Inventory Workspace", "tables": ["Samples", "Components", "Disposition states"], "description": "Represents sample records and current inventory status."},
     {"title": "Reference Catalog", "tables": ["Programs", "Sites", "Phases"], "description": "Keeps shared program and site vocabulary consistent across pages."},
-    {"title": "Operations Layer", "tables": ["Preview plans", "Import runs", "Demo access profile"], "description": "Provides workflow state without any private infrastructure."},
+    {"title": "Operations Layer", "tables": ["Preview plans", "Import runs", "Session profile"], "description": "Provides workflow state without any private infrastructure."},
 ]
 REF = {
     "studies": [
@@ -160,12 +170,12 @@ def demo_user() -> dict[str, Any]:
 
 
 def access_scope() -> dict[str, Any]:
-    return {"is_admin": False, "view_study_codes": [study["study_code"] for study in REF["studies"]], "upload_study_codes": [study["study_code"] for study in REF["studies"]], "study_access": [{"study_id": study["study_id"], "study_code": study["study_code"], "study_name": study["study_name"], "access_level": "UPLOAD"} for study in REF["studies"]], "study_access_summary": "Public demo access", "can_view_any": True, "can_upload_any": True}
+    return {"is_admin": False, "view_study_codes": [study["study_code"] for study in REF["studies"]], "upload_study_codes": [study["study_code"] for study in REF["studies"]], "study_access": [{"study_id": study["study_id"], "study_code": study["study_code"], "study_name": study["study_name"], "access_level": "UPLOAD"} for study in REF["studies"]], "study_access_summary": "Public demo session", "can_view_any": True, "can_upload_any": True}
 
 
 def primary_nav(active: str, mode: str = DEFAULT_UPLOAD_MODE) -> list[dict[str, Any]]:
     mode = normalize_upload_mode(mode)
-    return [{"label": "Home", "href": "/", "active": active == "home"}, {"label": "Patient Onboarding", "href": "/patient-onboarding", "active": active == "patient_onboarding"}, {"label": "Dataloader", "href": f"/dataloader?mode={mode}", "active": active == "dataloader"}, {"label": "AI Report Generator", "href": f"/reports/ai?mode={mode}", "active": active == "ai_report"}, {"label": "Dashboard", "href": f"/reports/dashboard?mode={mode}", "active": active == "dashboard"}]
+    return [{"label": "Home", "href": "/", "active": active == "home"}, {"label": "Patient Onboarding", "href": "/patient-onboarding", "active": active == "patient_onboarding"}, {"label": "Dataloader", "href": f"/dataloader?mode={mode}", "active": active == "dataloader"}, {"label": "Freezer Monitoring", "href": "/freezer-monitoring", "active": active == "freezer_monitoring"}, {"label": "AI Report Generator", "href": f"/reports/ai?mode={mode}", "active": active == "ai_report"}, {"label": "Dashboard", "href": f"/reports/dashboard?mode={mode}", "active": active == "dashboard"}]
 
 
 def upload_mode_tabs(mode: str) -> list[dict[str, Any]]:
@@ -215,11 +225,11 @@ def database_overview() -> dict[str, Any]:
     for row in rows:
         sample_counts[row["study_code"]] += 1
         disposition_counts[row["disposition_code"]] += 1
-    return {"metrics": [{"label": "Programs", "value": len(REF["studies"]), "detail": "Public demo programs available across the workspace."}, {"label": "Sites", "value": len(REF["sites"]), "detail": "Normalized collection locations visible in the public build."}, {"label": "Participants", "value": len({visit["patient_id"] for visit in VISITS}), "detail": "Synthetic participant identifiers used for walkthrough data."}, {"label": "Visits", "value": len(VISITS), "detail": "Demo visit records used across onboarding, reporting, and dashboard pages."}, {"label": "Inventory Items", "value": len(rows), "detail": "Synthetic inventory rows available in the demo query and loader flows."}], "study_breakdown": [{"study_code": study["study_code"], "patient_count": len(patient_counts[study["study_code"]]), "visit_count": visit_counts[study["study_code"]], "sample_count": sample_counts[study["study_code"]]} for study in REF["studies"]], "disposition_breakdown": [{"disposition_code": key.title(), "sample_count": value} for key, value in disposition_counts.items()], "schema_areas": SCHEMA_AREAS}
+    return {"metrics": [{"label": "Programs", "value": len(REF["studies"]), "detail": "Programs currently configured for intake, reporting, and inventory review."}, {"label": "Sites", "value": len(REF["sites"]), "detail": "Collection and processing locations represented across the workspace."}, {"label": "Participants", "value": len({visit["patient_id"] for visit in VISITS}), "detail": "Participants currently represented in the registry and downstream workflows."}, {"label": "Visits", "value": len(VISITS), "detail": "Visit records available for onboarding, reporting, and specimen reconciliation."}, {"label": "Inventory Items", "value": len(rows), "detail": "Specimen inventory rows available for intake review and operational reporting."}], "study_breakdown": [{"study_code": study["study_code"], "patient_count": len(patient_counts[study["study_code"]]), "visit_count": visit_counts[study["study_code"]], "sample_count": sample_counts[study["study_code"]]} for study in REF["studies"]], "disposition_breakdown": [{"disposition_code": key.title(), "sample_count": value} for key, value in disposition_counts.items()], "schema_areas": SCHEMA_AREAS}
 
 
 def current_runtime_status() -> dict[str, Any]:
-    return {"db_ready": False, "ai_ready": False, "ai_provider": None, "query_ai_enabled": False, "rag_ai_provider": None, "rag_model_name": None, "rag_snapshot_status": {"ready": False, "note": "This public clone uses a synthetic dataset only.", "source_files": {"demo_profile": False, "demo_inventory": False}}, "header_assistant_enabled": False, "ai_spend_safe_mode": True, "latest_import": IMPORT_RUNS[0] if IMPORT_RUNS else None, "import_error": None, "public_demo_mode": True, "current_user": {**demo_user(), **{"study_access_summary": access_scope()["study_access_summary"], "view_study_codes": access_scope()["view_study_codes"], "upload_study_codes": access_scope()["upload_study_codes"], "study_access": access_scope()["study_access"], "can_view_any": True, "can_upload_any": True}}}
+    return {"db_ready": False, "ai_ready": False, "ai_provider": None, "query_ai_enabled": False, "rag_ai_provider": None, "rag_model_name": None, "rag_snapshot_status": {"ready": False, "note": "This workspace is running in a standalone environment.", "source_files": {"demo_profile": False, "demo_inventory": False}}, "header_assistant_enabled": False, "ai_spend_safe_mode": True, "latest_import": IMPORT_RUNS[0] if IMPORT_RUNS else None, "import_error": None, "public_demo_mode": True, "current_user": {**demo_user(), **{"study_access_summary": access_scope()["study_access_summary"], "view_study_codes": access_scope()["view_study_codes"], "upload_study_codes": access_scope()["upload_study_codes"], "study_access": access_scope()["study_access"], "can_view_any": True, "can_upload_any": True}}}
 
 
 def render_page(request: Request, template_name: str, context: dict[str, Any], status_code: int = 200) -> HTMLResponse:
@@ -337,7 +347,7 @@ def metric_reply(metric_name: str, requested_code: str | None = None) -> str:
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request) -> HTMLResponse:
     mode = normalize_upload_mode(DEFAULT_UPLOAD_MODE)
-    return render_page(request, "home.html", {"upload_mode": mode, "upload_mode_label": UPLOAD_MODES[mode]["label"], "primary_nav": primary_nav("home", mode), "database_overview": database_overview(), "app_page": "home"})
+    return render_page(request, "home.html", {"upload_mode": mode, "upload_mode_label": UPLOAD_MODES[mode]["label"], "primary_nav": primary_nav("home", mode), "database_overview": database_overview(), "freezer_overview": build_freezer_overview(), "app_page": "home"})
 
 
 @app.get("/home", response_class=HTMLResponse)
@@ -407,6 +417,12 @@ async def patient_onboarding_submit(
     return render_page(request, "patient_onboarding.html", {"upload_mode": mode, "upload_mode_label": UPLOAD_MODES[mode]["label"], "primary_nav": primary_nav("patient_onboarding", mode), "reference_data": REF, "recent_visits": recent_patient_visits(), "message": message, "message_tone": tone, "form_data": {} if created else form_data, "created_visit": created, "app_page": "patient_onboarding"}, status_code=status)
 
 
+@app.get("/freezer-monitoring", response_class=HTMLResponse)
+async def freezer_monitoring_page(request: Request) -> HTMLResponse:
+    mode = normalize_upload_mode(DEFAULT_UPLOAD_MODE)
+    return render_page(request, "freezer_monitoring.html", {"upload_mode": mode, "upload_mode_label": UPLOAD_MODES[mode]["label"], "primary_nav": primary_nav("freezer_monitoring", mode), "freezer_overview": build_freezer_overview(), "app_page": "freezer_monitoring"})
+
+
 @app.get("/reports/ai", response_class=HTMLResponse)
 async def ai_report_page(request: Request, mode: str = DEFAULT_UPLOAD_MODE) -> HTMLResponse:
     mode = normalize_upload_mode(mode)
@@ -416,7 +432,7 @@ async def ai_report_page(request: Request, mode: str = DEFAULT_UPLOAD_MODE) -> H
 @app.get("/reports/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request, mode: str = DEFAULT_UPLOAD_MODE) -> HTMLResponse:
     mode = normalize_upload_mode(mode)
-    return render_page(request, "dashboard_report.html", {"upload_mode": mode, "upload_mode_label": UPLOAD_MODES[mode]["label"], "primary_nav": primary_nav("dashboard", mode), "database_overview": database_overview(), "recent_visits": recent_patient_visits(6), "app_page": "dashboard"})
+    return render_page(request, "dashboard_report.html", {"upload_mode": mode, "upload_mode_label": UPLOAD_MODES[mode]["label"], "primary_nav": primary_nav("dashboard", mode), "database_overview": database_overview(), "freezer_overview": build_freezer_overview(), "recent_visits": recent_patient_visits(6), "app_page": "dashboard"})
 
 
 @app.post("/api/upload/preview")
@@ -489,6 +505,19 @@ async def runtime_status_api() -> dict[str, Any]:
     return current_runtime_status()
 
 
+@app.get("/api/freezer-monitoring/dashboard")
+async def freezer_dashboard_api() -> dict[str, Any]:
+    return build_freezer_dashboard_payload()
+
+
+@app.get("/api/freezer-monitoring/freezers/{freezer_id}")
+async def freezer_detail_api(freezer_id: str, limit: int = 48) -> dict[str, Any]:
+    try:
+        return build_freezer_detail_payload(freezer_id, limit=limit)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Freezer not found: {exc.args[0]}") from exc
+
+
 @app.post("/api/query")
 async def query_api(payload: QueryRequest) -> dict[str, Any]:
     codes = selected_codes(payload.study_filters)
@@ -512,6 +541,9 @@ async def chat_api(payload: ChatRequest) -> dict[str, Any]:
     text = " ".join(str(message.content) for message in payload.messages if message.role == "user").strip()
     lower = text.lower()
     code = next((study["study_code"] for study in REF["studies"] if study["study_code"].lower() in lower or study["study_name"].lower() in lower), None)
+    if "freezer" in lower or "temperature" in lower or "cold storage" in lower:
+        freezer_overview = build_freezer_overview()
+        return {"reply": f"The public demo freezer module tracks {freezer_overview['summary']['total']} synthetic units, with {freezer_overview['summary']['critical']} critical alarms and {freezer_overview['summary']['warning']} warning states. Open Freezer Monitoring to review the command center view without any live APIs or protected temperature data."}
     if "participant" in lower or "patient" in lower:
         return {"reply": metric_reply("participant_count", code)}
     if "sample" in lower or "inventory" in lower:
