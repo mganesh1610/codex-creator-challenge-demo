@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ app_title }} | Home</title>
   <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="stylesheet" href="/static/freezer.css" />
 </head>
 <body>
   <div class="page-shell">
@@ -56,10 +57,10 @@
           <article class="feature-card">
             <span class="feature-kicker">Cold Storage</span>
             <h3>Freezer Monitoring</h3>
-            <p>Track synthetic freezer status, alert drift, and storage readiness.</p>
+            <p>Review freezer health, alert drift, and monitored storage readiness.</p>
             <div class="feature-card-meta">
               <span>Alert wall</span>
-              <span>Synthetic telemetry</span>
+              <span>Sensor health</span>
             </div>
             <div class="actions compact">
               <a class="button secondary" href="/freezer-monitoring">Monitor Storage</a>
@@ -91,9 +92,33 @@
           </article>
         </div>
       </section>
+      <section class="card wide home-freezer-preview-card">
+        <div class="card-head">
+          <h2>Sensor Wall Preview</h2>
+          <p>Current freezer states across the monitored storage network.</p>
+        </div>
+        <div class="home-freezer-preview-row">
+          {% for unit in freezer_overview.preview_units %}
+          <a class="freezer-tile home-freezer-tile {{ unit.status }}" href="/freezer-monitoring?freezer={{ unit.freezer_id }}">
+            <div class="freezer-tile-ribbon">
+              <span class="freezer-tile-number">{{ unit.display_id }}</span>
+              <span class="freezer-tile-state">{{ unit.status_label }}</span>
+            </div>
+            <div class="freezer-tile-reading">{% if unit.reading is not none %}{{ "%.1f"|format(unit.reading) }}{% else %}--{% endif %}</div>
+            <div class="freezer-tile-units">{{ unit.units }}</div>
+            <div class="freezer-tile-name">{{ unit.name }}</div>
+            <div class="freezer-tile-focus">
+              <span class="freezer-focus-pill">{{ unit.specimen_focus }}</span>
+              <span class="freezer-focus-pill">{{ unit.study_codes | join(" / ") }}</span>
+            </div>
+            <div class="freezer-tile-meta">{{ unit.building_name }} | {{ unit.zone }}<br>{{ "%.0f"|format(unit.age_minutes or 0) }} min old</div>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
       <section class="card wide"><div class="card-head"><h2>Operational Snapshot</h2><p>These counts give teams a quick read on program coverage, site footprint, participant volume, visit activity, and specimen inventory scale.</p></div><div class="metric-grid">{% for metric in database_overview.metrics %}<article class="metric-card"><span class="banner-label">{{ metric.label }}</span><strong>{{ metric.value }}</strong><p>{{ metric.detail }}</p></article>{% endfor %}</div></section>
       <section class="card wide"><div class="card-head"><h2>Study Breakdown</h2><p>Compare participant, visit, and sample volume across active studies to understand workload and inventory distribution.</p></div><div class="table-wrap"><table class="mini-table"><thead><tr><th>Study</th><th>Patients</th><th>Visits</th><th>Samples</th></tr></thead><tbody>{% for row in database_overview.study_breakdown %}<tr><td>{{ row.study_code }}</td><td>{{ row.patient_count }}</td><td>{{ row.visit_count }}</td><td>{{ row.sample_count }}</td></tr>{% endfor %}</tbody></table></div></section>
-      <section class="card wide"><div class="card-head"><h2>Cold Storage Snapshot</h2><p>The public-safe freezer module uses synthetic telemetry patterns to model alerting and capacity planning without any live building data.</p></div><div class="home-split"><div><div class="metric-grid">{% for metric in freezer_overview.metrics %}<article class="metric-card"><span class="banner-label">{{ metric.label }}</span><strong>{{ metric.value }}</strong><p>{{ metric.detail }}</p></article>{% endfor %}</div><div class="chip-row">{% for code in freezer_overview.study_codes %}<span class="study-chip upload">{{ code }}</span>{% endfor %}</div><div class="actions compact"><a class="button secondary" href="/freezer-monitoring">Open Freezer Monitoring</a></div></div><div><div class="table-wrap"><table class="mini-table"><thead><tr><th>Freezer</th><th>Building</th><th>Status</th><th>Temp</th></tr></thead><tbody>{% for alert in freezer_overview.alerts %}<tr><td>{{ alert.display_id }}</td><td>{{ alert.building_name }}</td><td>{{ alert.status_label }}</td><td>{% if alert.reading is not none %}{{ "%.1f"|format(alert.reading) }} {{ alert.units }}{% else %}--{% endif %}</td></tr>{% endfor %}</tbody></table></div></div></div></section>
+      <section class="card wide"><div class="card-head"><h2>Cold Storage Snapshot</h2><p>Monitor threshold pressure, storage coverage, and current alert states across active freezer locations.</p></div><div class="home-split"><div><div class="metric-grid">{% for metric in freezer_overview.metrics %}<article class="metric-card"><span class="banner-label">{{ metric.label }}</span><strong>{{ metric.value }}</strong><p>{{ metric.detail }}</p></article>{% endfor %}</div><div class="chip-row">{% for code in freezer_overview.study_codes %}<span class="study-chip upload">{{ code }}</span>{% endfor %}</div><div class="actions compact"><a class="button secondary" href="/freezer-monitoring">Open Freezer Monitoring</a></div></div><div><div class="table-wrap"><table class="mini-table"><thead><tr><th>Freezer</th><th>Building</th><th>Status</th><th>Temp</th></tr></thead><tbody>{% for alert in freezer_overview.alerts %}<tr><td>{{ alert.display_id }}</td><td>{{ alert.building_name }}</td><td>{{ alert.status_label }}</td><td>{% if alert.reading is not none %}{{ "%.1f"|format(alert.reading) }} {{ alert.units }}{% else %}--{% endif %}</td></tr>{% endfor %}</tbody></table></div></div></div></section>
     </main>
   </div>
   <script>

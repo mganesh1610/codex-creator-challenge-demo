@@ -543,7 +543,7 @@ async def chat_api(payload: ChatRequest) -> dict[str, Any]:
     code = next((study["study_code"] for study in REF["studies"] if study["study_code"].lower() in lower or study["study_name"].lower() in lower), None)
     if "freezer" in lower or "temperature" in lower or "cold storage" in lower:
         freezer_overview = build_freezer_overview()
-        return {"reply": f"The public demo freezer module tracks {freezer_overview['summary']['total']} synthetic units, with {freezer_overview['summary']['critical']} critical alarms and {freezer_overview['summary']['warning']} warning states. Open Freezer Monitoring to review the command center view without any live APIs or protected temperature data."}
+        return {"reply": f"Freezer Monitoring currently tracks {freezer_overview['summary']['total']} units, with {freezer_overview['summary']['critical']} critical alarms and {freezer_overview['summary']['warning']} warning states. Open the freezer command center to review alert pressure, monitored capacity, and current storage coverage."}
     if "participant" in lower or "patient" in lower:
         return {"reply": metric_reply("participant_count", code)}
     if "sample" in lower or "inventory" in lower:

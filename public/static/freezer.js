@@ -1,6 +1,8 @@
+const requestedFreezerId = new URL(window.location.href).searchParams.get("freezer");
+
 const freezerState = {
   dashboard: null,
-  selectedId: null,
+  selectedId: requestedFreezerId || null,
   refreshTimer: null,
   refreshMode: "auto",
 };
@@ -150,37 +152,37 @@ function freezerRenderSummary(summary, freezers) {
     {
       label: "Units Monitored",
       value: summary.total,
-      detail: "Synthetic freezers included in the public demo command center.",
+      detail: "Cold-storage units currently visible in the monitoring wall.",
       tone: "",
     },
     {
       label: "Critical",
       value: summary.critical,
-      detail: "Units currently simulated as active alarms.",
+      detail: "Units currently outside threshold and needing operator response.",
       tone: "critical",
     },
     {
       label: "Warnings",
       value: summary.warning,
-      detail: "Units inside the warning buffer but still inside threshold.",
+      detail: "Units approaching threshold and flagged for closer review.",
       tone: "warning",
     },
     {
       label: "Stale",
       value: summary.stale,
-      detail: "Units where the latest synthetic update is intentionally aged out.",
+      detail: "Units where the latest sensor update is outside the expected window.",
       tone: "stale",
     },
     {
       label: "Manual Review",
       value: summary.no_feed,
-      detail: "Example state for workflows that stay off live telemetry in the public build.",
+      detail: "Units being checked after feed interruption or sensor maintenance.",
       tone: "manual",
     },
     {
       label: "Protected Vials",
       value: freezerProtectedSamples(freezers).toLocaleString(),
-      detail: "Synthetic specimen capacity linked to freezer planning and alert prioritization.",
+      detail: "Estimated vial volume linked to this cold-storage footprint.",
       tone: "normal",
     },
   ];
@@ -289,12 +291,12 @@ function freezerLinePath(points, plotLeft, plotWidth, height, minValue, span) {
 
 function freezerRenderChart(history, freezer) {
   if (!history.length) {
-    return `<div class="freezer-chart-wrap"><p>No synthetic trend is available for this freezer.</p></div>`;
+    return `<div class="freezer-chart-wrap"><p>No recent trend is available for this freezer.</p></div>`;
   }
 
   const points = history.filter((item) => item.reading !== null && item.reading !== undefined);
   if (!points.length) {
-    return `<div class="freezer-chart-wrap"><p>This unit is configured as a manual-review example with no live trend line.</p></div>`;
+    return `<div class="freezer-chart-wrap"><p>This unit is currently under manual review and does not have an active trend line.</p></div>`;
   }
 
   const width = 620;
@@ -477,9 +479,9 @@ function freezerFitScrollablePanels() {
 
   freezerScrollFrame = window.requestAnimationFrame(() => {
     if (window.innerWidth > 1180) {
-      freezerApplyHeight(freezerEls.alertList, 320, Math.max(360, Math.floor(window.innerHeight * 0.68)));
-      freezerApplyHeight(freezerEls.sensorWall, 420, Math.max(460, Math.floor(window.innerHeight * 0.74)));
-      freezerApplyHeight(freezerEls.tableWrap, 320, Math.max(360, Math.floor(window.innerHeight * 0.62)));
+      freezerApplyHeight(freezerEls.alertList, 280, Math.max(320, Math.floor(window.innerHeight * 0.58)));
+      freezerApplyHeight(freezerEls.sensorWall, 330, Math.max(380, Math.floor(window.innerHeight * 0.62)));
+      freezerApplyHeight(freezerEls.tableWrap, 280, Math.max(320, Math.floor(window.innerHeight * 0.54)));
     } else {
       [freezerEls.alertList, freezerEls.sensorWall, freezerEls.tableWrap].forEach((element) => {
         if (element) element.style.height = "";
@@ -536,7 +538,7 @@ async function freezerLoadDashboard() {
   const payload = await response.json();
   freezerState.dashboard = payload;
   freezerEls.lastRefresh.textContent = freezerFormatTime(payload.generated_at);
-  freezerEls.dataMode.textContent = "Synthetic demo";
+  freezerEls.dataMode.textContent = "Environmental feed";
 
   freezerPopulateSelect(freezerEls.zoneFilter, payload.zones || [], "zone");
   freezerPopulateSelect(freezerEls.buildingFilter, payload.buildings || [], "building");
@@ -572,7 +574,7 @@ freezerLoadDashboard()
           <strong>Freezer dashboard unavailable</strong>
           <span>Offline</span>
         </div>
-        <p>The synthetic freezer module could not be loaded.</p>
+        <p>The freezer monitoring module could not be loaded.</p>
       </article>
     `;
     freezerEls.sensorWall.innerHTML = "";

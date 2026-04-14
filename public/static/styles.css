@@ -1923,19 +1923,21 @@ input[type="text"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 30px;
-  padding: 6px 12px 5px;
-  border-radius: 999px;
-  background: rgba(140, 29, 64, 0.06);
+  min-height: 0;
+  padding: 7px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(140, 29, 64, 0.1);
+  background: rgba(140, 29, 64, 0.05);
   color: var(--accent-dark);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: 0.04em;
+  line-height: 1.2;
+  letter-spacing: 0.05em;
 }
 
 .feature-card-primary .feature-card-meta span {
-  background: rgba(255, 248, 243, 0.12);
+  border-color: rgba(255, 248, 243, 0.14);
+  background: rgba(255, 248, 243, 0.1);
   color: #fff8f3;
 }
 

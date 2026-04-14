@@ -7,7 +7,7 @@ from typing import Any
 FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     {
         "freezer_id": "FZR-A-101",
-        "building_name": "Biodesign A",
+        "building_name": "North Campus",
         "zone": "Respiratory Core",
         "name": "Serum Archive Bay 01",
         "specimen_focus": "Serum / plasma",
@@ -25,7 +25,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-A-104",
-        "building_name": "Biodesign A",
+        "building_name": "North Campus",
         "zone": "Immune Cell Bank",
         "name": "PBMC Cryobank Rack 4",
         "specimen_focus": "PBMC",
@@ -43,7 +43,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-A-107",
-        "building_name": "Biodesign A",
+        "building_name": "North Campus",
         "zone": "Clinical Intake",
         "name": "Short-Hold Intake Freezer",
         "specimen_focus": "Daily intake",
@@ -61,7 +61,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-A-111",
-        "building_name": "Biodesign A",
+        "building_name": "North Campus",
         "zone": "Clinical Intake",
         "name": "Overflow Intake Cabinet",
         "specimen_focus": "Short-term aliquots",
@@ -79,7 +79,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-B-202",
-        "building_name": "Biodesign B",
+        "building_name": "Riverfront Center",
         "zone": "Longitudinal Vault",
         "name": "Recovery Cohort Vault",
         "specimen_focus": "Longitudinal serum",
@@ -97,7 +97,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-B-205",
-        "building_name": "Biodesign B",
+        "building_name": "Riverfront Center",
         "zone": "Longitudinal Vault",
         "name": "Follow-up Aliquot Reserve",
         "specimen_focus": "Plasma / serum",
@@ -115,7 +115,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-B-208",
-        "building_name": "Biodesign B",
+        "building_name": "Riverfront Center",
         "zone": "Genomics Annex",
         "name": "DNA Recovery Block",
         "specimen_focus": "DNA / buffy coat",
@@ -133,7 +133,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-B-212",
-        "building_name": "Biodesign B",
+        "building_name": "Riverfront Center",
         "zone": "Genomics Annex",
         "name": "RNA Stabilization Hold",
         "specimen_focus": "RNA backup plates",
@@ -151,7 +151,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-C-301",
-        "building_name": "Biodesign C",
+        "building_name": "West Annex",
         "zone": "Pathology Support",
         "name": "Manual Review Hold",
         "specimen_focus": "Pathology reserve",
@@ -169,7 +169,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-C-303",
-        "building_name": "Biodesign C",
+        "building_name": "West Annex",
         "zone": "Pathology Support",
         "name": "Tissue Reference Freezer",
         "specimen_focus": "Tissue blocks",
@@ -187,7 +187,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-C-305",
-        "building_name": "Biodesign C",
+        "building_name": "West Annex",
         "zone": "Pathology Support",
         "name": "Whole Blood Reference Bank",
         "specimen_focus": "Whole blood",
@@ -205,7 +205,7 @@ FREEZER_BLUEPRINTS: list[dict[str, Any]] = [
     },
     {
         "freezer_id": "FZR-C-309",
-        "building_name": "Biodesign C",
+        "building_name": "West Annex",
         "zone": "Distribution Prep",
         "name": "Shipment Staging Freezer",
         "specimen_focus": "Outgoing transfers",
@@ -289,7 +289,7 @@ def _build_status(
             "label": "Manual review",
             "severity": 1,
             "age_minutes": None,
-            "status_reason": "This public build does not connect to real freezer telemetry or facility APIs.",
+            "status_reason": "Sensor feed is offline and the unit is currently under manual review.",
             "anomaly_score": 0,
         }
 
@@ -303,7 +303,7 @@ def _build_status(
             "label": "No data",
             "severity": 2,
             "age_minutes": age_minutes,
-            "status_reason": "No synthetic reading is available for this freezer.",
+            "status_reason": "No current reading is available for this unit.",
             "anomaly_score": 0,
         }
     if age_minutes is not None and age_minutes > STALE_AFTER_MINUTES:
@@ -312,7 +312,7 @@ def _build_status(
             "label": "Stale",
             "severity": 2,
             "age_minutes": age_minutes,
-            "status_reason": f"Latest simulated update is {age_minutes:.0f} minutes old.",
+            "status_reason": f"Latest sensor update is {age_minutes:.0f} minutes old.",
             "anomaly_score": min(round(age_minutes), 1000),
         }
     if reading < low_limit:
@@ -457,7 +457,7 @@ def _build_record(profile: dict[str, Any], history: list[dict[str, Any]] | None 
         "anomaly_score": status["anomaly_score"],
         "trend": _classify_trend(freezer_history),
         "telemetry_available": telemetry_available,
-        "monitoring_mode": "Synthetic telemetry" if telemetry_available else "Manual review state",
+        "monitoring_mode": "Automated monitoring" if telemetry_available else "Manual review",
     }
 
 
@@ -555,25 +555,26 @@ def build_freezer_overview() -> dict[str, Any]:
             {
                 "label": "Freezers Monitored",
                 "value": summary["total"],
-                "detail": "Synthetic cold-storage units included in the public monitoring demo.",
+                "detail": "Cold-storage units currently visible in the monitoring wall.",
             },
             {
                 "label": "At-Risk Units",
                 "value": summary["critical"] + summary["warning"] + summary["stale"],
-                "detail": "Freezers currently surfaced as alarms, warnings, or stale telemetry states.",
+                "detail": "Units currently surfaced as alarms, warnings, or overdue updates.",
             },
             {
                 "label": "Buildings",
                 "value": len(payload["buildings"]),
-                "detail": "Facility zones represented without exposing any live site telemetry.",
+                "detail": "Storage locations represented across the monitoring footprint.",
             },
             {
                 "label": "Protected Programs",
                 "value": len(payload["study_codes"]),
-                "detail": "Study areas linked to freezer capacity planning in the synthetic model.",
+                "detail": "Programs currently linked to freezer planning and coverage review.",
             },
         ],
         "alerts": payload["alerts"][:6],
+        "preview_units": payload["freezers"][:5],
         "study_codes": payload["study_codes"],
         "generated_at": payload["generated_at"],
         "summary": summary,

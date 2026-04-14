@@ -11,9 +11,9 @@
   <div class="page-shell">
     <header class="hero">
       <div>
-        <p class="eyebrow">Public Cold Storage Demo</p>
+        <p class="eyebrow">Cold Storage Operations</p>
         <h1>Freezer Monitoring</h1>
-        <p class="hero-copy">A public-safe freezer command center modeled on the private monitoring workflow, rebuilt entirely with synthetic telemetry, synthetic alert states, and zero live facility integrations.</p>
+        <p class="hero-copy">Cold-storage command center for freezer health, alert response, and monitored capacity across active programs.</p>
       </div>
       <div class="status-stack">
         <a class="status-chip ready status-chip-link" href="/">Home</a>
@@ -30,7 +30,7 @@
         </div>
       </div>
       <div class="actions compact portal-actions">
-        <span class="study-chip upload">Synthetic Telemetry Only</span>
+        <span class="study-chip upload">Cold Storage Network</span>
       </div>
     </section>
 
@@ -43,7 +43,7 @@
     <section class="access-strip">
       <div class="access-card">
         <span class="banner-label">Scope</span>
-        <p class="freezer-intro-copy">The monitoring layout mirrors the private freezer tracker, but every unit, threshold, building, and reading on this page is generated for the public demo.</p>
+        <p class="freezer-intro-copy">Review current alarm states, threshold pressure, program coverage, and unit status across the monitored storage network.</p>
         <div class="chip-row">
           {% for code in freezer_overview.study_codes %}
           <span class="study-chip upload">{{ code }}</span>
@@ -121,8 +121,8 @@
         <strong id="freezer-last-refresh">Loading...</strong>
       </article>
       <article class="freezer-status-card">
-        <span class="banner-label">Data Mode</span>
-        <strong id="freezer-data-mode">Synthetic demo</strong>
+        <span class="banner-label">Monitoring Layer</span>
+        <strong id="freezer-data-mode">Environmental feed</strong>
       </article>
       <article class="freezer-status-card">
         <span class="banner-label">Refresh Mode</span>
@@ -156,7 +156,7 @@
           <h2>Selected Freezer</h2>
           <span id="freezer-detail-badge">Pick a unit</span>
         </div>
-        <div class="freezer-detail-card freezer-detail-empty" id="freezer-detail-card">Select a freezer tile or alert row to inspect the synthetic reading, threshold band, study coverage, and recent temperature trend.</div>
+        <div class="freezer-detail-card freezer-detail-empty" id="freezer-detail-card">Select a freezer tile or alert row to inspect the current reading, threshold band, program coverage, and recent temperature trend.</div>
       </aside>
 
       <section class="freezer-panel freezer-panel-wide">
