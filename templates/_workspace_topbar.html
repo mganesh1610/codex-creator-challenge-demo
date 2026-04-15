@@ -1,5 +1,4 @@
 {% set profile_name = current_user.display_name or current_user.email %}
-{% set workspace_brand_title = app_title.replace("Biospecimen ", "") if "Biospecimen " in app_title else app_title %}
 <header class="workspace-bar">
   <div class="workspace-bar-main">
     <a class="workspace-brand" href="/">
@@ -15,8 +14,7 @@
         </svg>
       </span>
       <span class="workspace-brand-copy">
-        <span class="workspace-brand-kicker">Biospecimen Operations Workspace</span>
-        <span class="workspace-brand-title">{{ workspace_brand_title }}</span>
+        <span class="workspace-brand-title">{{ app_title }}</span>
       </span>
     </a>
     <nav class="workspace-nav" aria-label="Workspace navigation">
