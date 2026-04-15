@@ -29,14 +29,6 @@
         <div class="freezer-side-pane-body">
           <section class="freezer-side-group">
             <div class="freezer-side-group-head">
-              <h3>Network Snapshot</h3>
-              <span>Live rollup</span>
-            </div>
-            <section class="freezer-summary-strip freezer-side-summary" id="freezer-summary-strip"></section>
-          </section>
-
-          <section class="freezer-side-group">
-            <div class="freezer-side-group-head">
               <h3>Filters and Sort</h3>
               <span>Refine the wall</span>
             </div>
@@ -99,27 +91,6 @@
                   <button class="freezer-mode-button" id="freezer-manual-refresh" type="button">Manual</button>
                 </div>
               </div>
-            </section>
-          </section>
-
-          <section class="freezer-side-group">
-            <div class="freezer-side-group-head">
-              <h3>Live Status</h3>
-              <span>Current run state</span>
-            </div>
-            <section class="freezer-quick-status freezer-side-status">
-              <article class="freezer-status-card">
-                <span class="banner-label">Last Refresh</span>
-                <strong id="freezer-last-refresh">Loading...</strong>
-              </article>
-              <article class="freezer-status-card">
-                <span class="banner-label">Monitoring Layer</span>
-                <strong id="freezer-data-mode">Environmental feed</strong>
-              </article>
-              <article class="freezer-status-card">
-                <span class="banner-label">Programs Linked</span>
-                <strong>{{ freezer_overview.study_codes | join(", ") }}</strong>
-              </article>
             </section>
           </section>
         </div>

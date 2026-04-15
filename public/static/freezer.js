@@ -172,6 +172,9 @@ function freezerGetFilteredUnits() {
 }
 
 function freezerRenderSummary(summary, freezers) {
+  if (!freezerEls.summaryStrip) {
+    return;
+  }
   const cards = [
     {
       label: "Warnings",
@@ -554,8 +557,12 @@ async function freezerLoadDashboard() {
 
   const payload = await response.json();
   freezerState.dashboard = payload;
-  freezerEls.lastRefresh.textContent = freezerFormatTime(payload.generated_at);
-  freezerEls.dataMode.textContent = "Environmental feed";
+  if (freezerEls.lastRefresh) {
+    freezerEls.lastRefresh.textContent = freezerFormatTime(payload.generated_at);
+  }
+  if (freezerEls.dataMode) {
+    freezerEls.dataMode.textContent = "Environmental feed";
+  }
 
   freezerPopulateSelect(freezerEls.zoneFilter, payload.zones || [], "zone");
   freezerPopulateSelect(freezerEls.buildingFilter, payload.buildings || [], "building");
@@ -596,7 +603,9 @@ freezerLoadDashboard()
     freezerFitScrollablePanels();
   })
   .catch(() => {
-    freezerEls.lastRefresh.textContent = "Unavailable";
+    if (freezerEls.lastRefresh) {
+      freezerEls.lastRefresh.textContent = "Unavailable";
+    }
     freezerEls.detailBadge.textContent = "Unavailable";
     freezerEls.alertList.innerHTML = `
       <article class="freezer-alert-item">
