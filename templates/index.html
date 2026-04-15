@@ -10,28 +10,14 @@
     {% include "_workspace_topbar.html" %}
     <main class="dashboard dataloader-dashboard">
       <section class="card wide dataloader-intro-card">
-        <div class="page-intro-grid">
-          <div class="page-intro-copy">
-            <span class="page-eyebrow">Workbook intake</span>
-            <h2>{{ upload_mode_label }}</h2>
-            <p>Stage workbook files, validate headers, and simulate the exact import path before anything moves into reporting or inventory review.</p>
-            <div class="chip-row">
-              <span class="study-chip upload">Header review</span>
-              <span class="study-chip">Preview gates</span>
-              <span class="study-chip">Mode-aware import</span>
-            </div>
-          </div>
-          <div class="page-intro-aside">
-            <article class="page-intro-note">
-              <span>Current flow</span>
-              <strong>{{ upload_mode_label }}</strong>
-              <p>{% if upload_mode == "kept" %}Optimized for retained specimen workbooks and downstream inventory reconciliation.{% else %}Optimized for shared specimen routing, handoff review, and exchange-ready exports.{% endif %}</p>
-            </article>
-            <article class="page-intro-note">
-              <span>Workflow</span>
-              <strong>Preview, review, confirm</strong>
-              <p>Field mapping, flagged rows, and import simulation stay in one compact workspace.</p>
-            </article>
+        <div class="page-intro-copy">
+          <span class="page-eyebrow">Workbook intake</span>
+          <h2>{{ upload_mode_label }}</h2>
+          <p>Stage workbook files, validate headers, and simulate the exact import path before anything moves into reporting or inventory review.</p>
+          <div class="chip-row">
+            <span class="study-chip upload">Header review</span>
+            <span class="study-chip">Preview gates</span>
+            <span class="study-chip">Mode-aware import</span>
           </div>
         </div>
       </section>
