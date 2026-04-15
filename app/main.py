@@ -39,6 +39,12 @@ UPLOAD_MODES = {
     "kept": {"code": "RETAINED", "label": "Retained Uploads", "sheet": "Retained Intake", "keywords": ["retained", "kept"]},
     "sent": {"code": "SHARED", "label": "Shared Uploads", "sheet": "Shared Intake", "keywords": ["shared", "sent"]},
 }
+UPLOAD_MODE_ALIASES = {
+    "retained": "kept",
+    "retain": "kept",
+    "shared": "sent",
+    "share": "sent",
+}
 FIELD_CATALOG = [
     {"key": "patient_id", "label": "Patient ID", "category": "Registry"},
     {"key": "visit_number", "label": "Visit Number", "category": "Registry"},
@@ -310,6 +316,7 @@ class DiscardUploadRequest(BaseModel):
 
 def normalize_upload_mode(upload_mode: str | None) -> str:
     mode = (upload_mode or DEFAULT_UPLOAD_MODE).strip().lower()
+    mode = UPLOAD_MODE_ALIASES.get(mode, mode)
     if mode not in UPLOAD_MODES:
         raise HTTPException(status_code=400, detail=f"Unsupported upload mode: {upload_mode}")
     return mode
