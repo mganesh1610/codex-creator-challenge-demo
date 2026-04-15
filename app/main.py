@@ -4,7 +4,7 @@ import json
 import re
 import uuid
 from collections import Counter, defaultdict
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from io import BytesIO
 from pathlib import Path
 from typing import Any
@@ -86,28 +86,94 @@ REF = {
         {"site_id": 6, "site_name": "Central Processing", "site_abbreviation": "CP"},
     ],
 }
-VISITS = [
-    {"visit_id": 501, "patient_id": "DEMO-001", "visit_number": 1, "study_id": 1, "visit_phase_id": 1, "obtained_from_id": 1, "obtained_date": "2026-03-04", "study_year": 2026, "patient_visit_label": "RESP-001-BL", "sub_study_id": "RSP-001", "csid": "CS-1001"},
-    {"visit_id": 502, "patient_id": "DEMO-002", "visit_number": 2, "study_id": 1, "visit_phase_id": 2, "obtained_from_id": 2, "obtained_date": "2026-03-11", "study_year": 2026, "patient_visit_label": "RESP-002-FU", "sub_study_id": "RSP-002", "csid": "CS-1002"},
-    {"visit_id": 503, "patient_id": "DEMO-014", "visit_number": 1, "study_id": 2, "visit_phase_id": 1, "obtained_from_id": 3, "obtained_date": "2026-03-08", "study_year": 2026, "patient_visit_label": "IMM-014-BL", "sub_study_id": "IMM-014", "csid": "CS-1014"},
-    {"visit_id": 504, "patient_id": "DEMO-018", "visit_number": 2, "study_id": 2, "visit_phase_id": 2, "obtained_from_id": 4, "obtained_date": "2026-03-12", "study_year": 2026, "patient_visit_label": "IMM-018-FU", "sub_study_id": "IMM-018", "csid": "CS-1018"},
-    {"visit_id": 505, "patient_id": "DEMO-021", "visit_number": 1, "study_id": 3, "visit_phase_id": 1, "obtained_from_id": 5, "obtained_date": "2026-03-12", "study_year": 2026, "patient_visit_label": "LONG-021-BL", "sub_study_id": "LNG-021", "csid": "CS-1021"},
-    {"visit_id": 506, "patient_id": "DEMO-028", "visit_number": 3, "study_id": 3, "visit_phase_id": 3, "obtained_from_id": 6, "obtained_date": "2026-03-19", "study_year": 2026, "patient_visit_label": "LONG-028-RC", "sub_study_id": "LNG-028", "csid": "CS-1028"},
+STUDY_SEED_CONFIG = [
+    {"study_id": 1, "study_code": "RESP", "sub_prefix": "RSP", "patient_count": 24, "visit_pattern": (2, 2, 3), "site_cycle": (1, 2, 6, 4), "base_date": date(2026, 1, 6)},
+    {"study_id": 2, "study_code": "IMM", "sub_prefix": "IMM", "patient_count": 24, "visit_pattern": (2, 3, 3), "site_cycle": (3, 4, 6, 1), "base_date": date(2026, 1, 10)},
+    {"study_id": 3, "study_code": "LONG", "sub_prefix": "LNG", "patient_count": 24, "visit_pattern": (2, 3, 4), "site_cycle": (5, 6, 2, 1), "base_date": date(2026, 1, 14)},
 ]
-SAMPLES = [
-    {"visit_id": 501, "sample_barcode": "D-0001", "sample_type": "Serum", "component_code": "ALIQ-A", "disposition_code": "RETAINED"},
-    {"visit_id": 501, "sample_barcode": "D-0002", "sample_type": "Plasma", "component_code": "ALIQ-B", "disposition_code": "SHARED"},
-    {"visit_id": 502, "sample_barcode": "D-0003", "sample_type": "Whole Blood", "component_code": "WB", "disposition_code": "RETAINED"},
-    {"visit_id": 502, "sample_barcode": "D-0004", "sample_type": "PBMC", "component_code": "PBMC", "disposition_code": "SHARED"},
-    {"visit_id": 503, "sample_barcode": "D-0005", "sample_type": "Serum", "component_code": "ALIQ-A", "disposition_code": "RETAINED"},
-    {"visit_id": 503, "sample_barcode": "D-0006", "sample_type": "Saliva", "component_code": "SAL", "disposition_code": "RETAINED"},
-    {"visit_id": 504, "sample_barcode": "D-0007", "sample_type": "Plasma", "component_code": "ALIQ-B", "disposition_code": "SHARED"},
-    {"visit_id": 504, "sample_barcode": "D-0008", "sample_type": "Serum", "component_code": "ALIQ-A", "disposition_code": "RETAINED"},
-    {"visit_id": 505, "sample_barcode": "D-0009", "sample_type": "Serum", "component_code": "ALIQ-A", "disposition_code": "SHARED"},
-    {"visit_id": 505, "sample_barcode": "D-0010", "sample_type": "Plasma", "component_code": "ALIQ-B", "disposition_code": "RETAINED"},
-    {"visit_id": 506, "sample_barcode": "D-0011", "sample_type": "Whole Blood", "component_code": "WB", "disposition_code": "RETAINED"},
-    {"visit_id": 506, "sample_barcode": "D-0012", "sample_type": "PBMC", "component_code": "PBMC", "disposition_code": "SHARED"},
-]
+SAMPLE_PANEL_BY_STUDY = {
+    1: [
+        {"sample_type": "Serum", "component_code": "ALIQ-A"},
+        {"sample_type": "Plasma", "component_code": "ALIQ-B"},
+        {"sample_type": "Whole Blood", "component_code": "WB"},
+        {"sample_type": "Nasal Swab", "component_code": "NS"},
+        {"sample_type": "Buffy Coat", "component_code": "BC"},
+    ],
+    2: [
+        {"sample_type": "PBMC", "component_code": "PBMC"},
+        {"sample_type": "Serum", "component_code": "ALIQ-A"},
+        {"sample_type": "Plasma", "component_code": "ALIQ-B"},
+        {"sample_type": "RNA Lysate", "component_code": "RNA"},
+        {"sample_type": "DNA", "component_code": "DNA"},
+    ],
+    3: [
+        {"sample_type": "Serum", "component_code": "ALIQ-A"},
+        {"sample_type": "Plasma", "component_code": "ALIQ-B"},
+        {"sample_type": "Whole Blood", "component_code": "WB"},
+        {"sample_type": "Urine", "component_code": "UR"},
+        {"sample_type": "Saliva", "component_code": "SAL"},
+    ],
+}
+VISIT_LABEL_SUFFIX = {1: "BL", 2: "FU", 3: "RC", 4: "EXT"}
+
+
+def _seed_phase_id(visit_number: int) -> int:
+    if visit_number <= 1:
+        return 1
+    if visit_number == 2:
+        return 2
+    return 3
+
+
+def _build_seed_dataset() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    visits: list[dict[str, Any]] = []
+    samples: list[dict[str, Any]] = []
+    next_visit_id = 501
+    next_barcode = 1
+
+    for config in STUDY_SEED_CONFIG:
+        for patient_index in range(1, config["patient_count"] + 1):
+            patient_id = f"DEMO-{config['study_code']}-{patient_index:03d}"
+            visit_total = config["visit_pattern"][(patient_index - 1) % len(config["visit_pattern"])]
+            for visit_number in range(1, visit_total + 1):
+                phase_id = _seed_phase_id(visit_number)
+                label_suffix = VISIT_LABEL_SUFFIX.get(visit_number, "EXT")
+                site_id = config["site_cycle"][(patient_index + visit_number - 2) % len(config["site_cycle"])]
+                obtained_date = config["base_date"] + timedelta(days=((patient_index - 1) * 3) + ((visit_number - 1) * 14))
+                visit = {
+                    "visit_id": next_visit_id,
+                    "patient_id": patient_id,
+                    "visit_number": visit_number,
+                    "study_id": config["study_id"],
+                    "visit_phase_id": phase_id,
+                    "obtained_from_id": site_id,
+                    "obtained_date": obtained_date.isoformat(),
+                    "study_year": obtained_date.year,
+                    "patient_visit_label": f"{config['study_code']}-{patient_index:03d}-{label_suffix}",
+                    "sub_study_id": f"{config['sub_prefix']}-{patient_index:03d}",
+                    "csid": f"CS-{1000 + next_visit_id}",
+                }
+                visits.append(visit)
+
+                for sample_index, sample_def in enumerate(SAMPLE_PANEL_BY_STUDY[config["study_id"]], start=1):
+                    disposition_code = "SHARED" if (patient_index + visit_number + sample_index) % 3 == 0 else "RETAINED"
+                    samples.append(
+                        {
+                            "visit_id": next_visit_id,
+                            "sample_barcode": f"D-{next_barcode:05d}",
+                            "sample_type": sample_def["sample_type"],
+                            "component_code": sample_def["component_code"],
+                            "disposition_code": disposition_code,
+                        }
+                    )
+                    next_barcode += 1
+
+                next_visit_id += 1
+
+    return visits, samples
+
+
+VISITS, SAMPLES = _build_seed_dataset()
 PLANS: dict[str, dict[str, Any]] = {}
 IMPORT_RUNS: list[dict[str, Any]] = []
 
@@ -217,15 +283,93 @@ def database_overview() -> dict[str, Any]:
     visit_counts: Counter[str] = Counter()
     sample_counts: Counter[str] = Counter()
     disposition_counts: Counter[str] = Counter()
+    site_counts: dict[str, Counter[str]] = defaultdict(Counter)
+    phase_counts: dict[str, Counter[str]] = defaultdict(Counter)
+    latest_activity: dict[str, str] = {}
+
     for visit in VISITS:
         study = lookup(REF["studies"], "study_id", visit["study_id"]) or {}
+        phase = lookup(REF["phases"], "visit_phase_id", visit["visit_phase_id"]) or {}
+        site = lookup(REF["sites"], "site_id", visit["obtained_from_id"]) or {}
         code = study.get("study_code", "UNASSIGNED")
         patient_counts[code].add(visit["patient_id"])
         visit_counts[code] += 1
+        if site.get("site_name"):
+            site_counts[code][site["site_name"]] += 1
+        if phase.get("phase_code"):
+            phase_counts[code][phase["phase_code"]] += 1
+        if visit.get("obtained_date"):
+            latest_activity[code] = max(latest_activity.get(code, ""), visit["obtained_date"])
+
     for row in rows:
         sample_counts[row["study_code"]] += 1
         disposition_counts[row["disposition_code"]] += 1
-    return {"metrics": [{"label": "Programs", "value": len(REF["studies"]), "detail": "Programs currently configured for intake, reporting, and inventory review."}, {"label": "Sites", "value": len(REF["sites"]), "detail": "Collection and processing locations represented across the workspace."}, {"label": "Participants", "value": len({visit["patient_id"] for visit in VISITS}), "detail": "Participants currently represented in the registry and downstream workflows."}, {"label": "Visits", "value": len(VISITS), "detail": "Visit records available for onboarding, reporting, and specimen reconciliation."}, {"label": "Inventory Items", "value": len(rows), "detail": "Specimen inventory rows available for intake review and operational reporting."}], "study_breakdown": [{"study_code": study["study_code"], "patient_count": len(patient_counts[study["study_code"]]), "visit_count": visit_counts[study["study_code"]], "sample_count": sample_counts[study["study_code"]]} for study in REF["studies"]], "disposition_breakdown": [{"disposition_code": key.title(), "sample_count": value} for key, value in disposition_counts.items()], "schema_areas": SCHEMA_AREAS}
+
+    total_samples = max(sum(sample_counts.values()), 1)
+    study_breakdown = []
+    for study in REF["studies"]:
+        code = study["study_code"]
+        patient_total = len(patient_counts[code])
+        visit_total = visit_counts[code]
+        sample_total = sample_counts[code]
+        lead_site = site_counts[code].most_common(1)[0][0] if site_counts[code] else "Network"
+        phase_focus = phase_counts[code].most_common(1)[0][0].title() if phase_counts[code] else "Active"
+        sample_share = round((sample_total / total_samples) * 100)
+        avg_samples_per_visit = round(sample_total / max(visit_total, 1), 1)
+        study_breakdown.append(
+            {
+                "study_code": code,
+                "study_name": study["study_name"],
+                "patient_count": patient_total,
+                "visit_count": visit_total,
+                "sample_count": sample_total,
+                "patient_count_display": f"{patient_total:,}",
+                "visit_count_display": f"{visit_total:,}",
+                "sample_count_display": f"{sample_total:,}",
+                "sample_share": sample_share,
+                "avg_samples_per_visit": avg_samples_per_visit,
+                "avg_samples_per_visit_display": f"{avg_samples_per_visit:.1f}",
+                "lead_site": lead_site,
+                "phase_focus": phase_focus,
+                "latest_activity": latest_activity.get(code, "2026-04-01"),
+            }
+        )
+
+    study_breakdown.sort(key=lambda row: row["sample_count"], reverse=True)
+    participant_total = len({visit["patient_id"] for visit in VISITS})
+
+    return {
+        "metrics": [
+            {
+                "label": "Programs",
+                "value": f"{len(REF['studies']):,}",
+                "detail": "Programs currently configured for intake, reporting, and inventory review.",
+            },
+            {
+                "label": "Sites",
+                "value": f"{len(REF['sites']):,}",
+                "detail": "Collection and processing locations represented across the workspace.",
+            },
+            {
+                "label": "Participants",
+                "value": f"{participant_total:,}",
+                "detail": "Participants currently represented in the registry and downstream workflows.",
+            },
+            {
+                "label": "Visits",
+                "value": f"{len(VISITS):,}",
+                "detail": "Visit records available for onboarding, reporting, and specimen reconciliation.",
+            },
+            {
+                "label": "Inventory Items",
+                "value": f"{len(rows):,}",
+                "detail": "Specimen inventory rows available for intake review and operational reporting.",
+            },
+        ],
+        "study_breakdown": study_breakdown,
+        "disposition_breakdown": [{"disposition_code": key.title(), "sample_count": value} for key, value in disposition_counts.items()],
+        "schema_areas": SCHEMA_AREAS,
+    }
 
 
 def current_runtime_status() -> dict[str, Any]:

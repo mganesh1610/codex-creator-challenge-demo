@@ -550,32 +550,52 @@ def build_freezer_detail_payload(freezer_id: str, limit: int = 48) -> dict[str, 
 def build_freezer_overview() -> dict[str, Any]:
     payload = build_freezer_dashboard_payload()
     summary = payload["summary"]
+    inventory_total = sum(item["occupied_vials"] for item in payload["freezers"])
+    capacity_total = sum(item["capacity_vials"] for item in payload["freezers"])
+    at_risk_inventory = sum(item["occupied_vials"] for item in payload["freezers"] if item["severity"] > 0)
+    daily_sensor_checks = len(payload["freezers"]) * 96
+    fill_percentage = round((inventory_total / max(capacity_total, 1)) * 100)
+    overview_rows = [
+        {
+            **item,
+            "fill_percentage": round(item["fill_ratio"] * 100),
+        }
+        for item in payload["freezers"][:8]
+    ]
+
     return {
         "metrics": [
             {
-                "label": "Freezers Monitored",
-                "value": summary["total"],
-                "detail": "Cold-storage units currently visible in the monitoring wall.",
+                "label": "Protected Vials",
+                "value": f"{inventory_total:,}",
+                "detail": "Current inventory represented across the monitored freezer network.",
             },
             {
-                "label": "At-Risk Units",
-                "value": summary["critical"] + summary["warning"] + summary["stale"],
-                "detail": "Units currently surfaced as alarms, warnings, or overdue updates.",
+                "label": "Capacity Footprint",
+                "value": f"{capacity_total:,}",
+                "detail": "Total vial capacity currently modeled across monitored storage units.",
             },
             {
-                "label": "Buildings",
-                "value": len(payload["buildings"]),
-                "detail": "Storage locations represented across the monitoring footprint.",
+                "label": "At-Risk Inventory",
+                "value": f"{at_risk_inventory:,}",
+                "detail": "Protected vials currently sitting inside alarm, warning, or stale-response units.",
             },
             {
-                "label": "Protected Programs",
-                "value": len(payload["study_codes"]),
-                "detail": "Programs currently linked to freezer planning and coverage review.",
+                "label": "Daily Sensor Checks",
+                "value": f"{daily_sensor_checks:,}",
+                "detail": "15-minute temperature checks expected across the storage wall each day.",
             },
         ],
         "alerts": payload["alerts"][:6],
         "preview_units": payload["freezers"][:5],
+        "overview_rows": overview_rows,
         "study_codes": payload["study_codes"],
         "generated_at": payload["generated_at"],
         "summary": summary,
+        "inventory_total": inventory_total,
+        "inventory_total_display": f"{inventory_total:,}",
+        "capacity_total": capacity_total,
+        "capacity_total_display": f"{capacity_total:,}",
+        "fill_percentage": fill_percentage,
+        "summary_line": f"{summary['critical'] + summary['warning'] + summary['stale']} units currently need response across {len(payload['buildings'])} storage locations while protecting {inventory_total:,} active vials.",
     }

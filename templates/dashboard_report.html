@@ -57,13 +57,32 @@
       </section>
 
       <section class="card wide">
-        <div class="card-head">
-          <h2>Cold Storage Snapshot</h2>
-          <p>Freezer monitoring highlights alert pressure, storage coverage, and current unit status across active locations.</p>
-        </div>
-        <div class="home-split">
+        <div class="card-head card-head-actions">
           <div>
-            <div class="metric-grid">
+            <h2>Cold Storage Snapshot</h2>
+            <p>Freezer status, protected inventory, and response pressure across the monitored storage network.</p>
+          </div>
+          <div class="actions compact">
+            <a class="button secondary" href="/freezer-monitoring">View Freezer Status</a>
+          </div>
+        </div>
+        <div class="cold-storage-home-grid">
+          <div class="cold-storage-home-main">
+            <article class="cold-storage-highlight">
+              <span class="banner-label">Protected freezer inventory</span>
+              <strong>{{ freezer_overview.inventory_total_display }}</strong>
+              <p>{{ freezer_overview.summary_line }}</p>
+              <div class="cold-storage-highlight-meta">
+                <span>{{ freezer_overview.fill_percentage }}% occupied</span>
+                <span>{{ freezer_overview.capacity_total_display }} total capacity</span>
+              </div>
+              <div class="chip-row">
+                {% for code in freezer_overview.study_codes %}
+                <span class="study-chip upload">{{ code }}</span>
+                {% endfor %}
+              </div>
+            </article>
+            <div class="metric-grid cold-storage-metric-grid">
               {% for metric in freezer_overview.metrics %}
               <article class="metric-card">
                 <span class="banner-label">{{ metric.label }}</span>
@@ -72,33 +91,33 @@
               </article>
               {% endfor %}
             </div>
-            <div class="chip-row">
-              {% for code in freezer_overview.study_codes %}
-              <span class="study-chip upload">{{ code }}</span>
-              {% endfor %}
-            </div>
-            <div class="actions compact">
-              <a class="button secondary" href="/freezer-monitoring">Open Freezer Monitoring</a>
-            </div>
           </div>
-          <div>
-            <div class="table-wrap">
-              <table class="mini-table">
+          <div class="cold-storage-table-shell">
+            <div class="cold-storage-table-head">
+              <h3>Freezer Status Board</h3>
+              <p>Priority units surfaced from the monitoring wall.</p>
+            </div>
+            <div class="table-wrap cold-storage-table-wrap">
+              <table class="mini-table cold-storage-mini-table">
                 <thead>
                   <tr>
                     <th>Freezer</th>
-                    <th>Building</th>
-                    <th>Status</th>
+                    <th>Location</th>
+                    <th>Programs</th>
+                    <th>Fill</th>
                     <th>Temp</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for alert in freezer_overview.alerts %}
+                  {% for unit in freezer_overview.overview_rows %}
                   <tr>
-                    <td>{{ alert.display_id }}</td>
-                    <td>{{ alert.building_name }}</td>
-                    <td>{{ alert.status_label }}</td>
-                    <td>{% if alert.reading is not none %}{{ "%.1f"|format(alert.reading) }} {{ alert.units }}{% else %}--{% endif %}</td>
+                    <td><strong>{{ unit.display_id }}</strong><span class="table-note">{{ unit.name }}</span></td>
+                    <td>{{ unit.building_name }}<span class="table-note">{{ unit.zone }}</span></td>
+                    <td>{{ unit.study_codes | join(" / ") }}</td>
+                    <td>{{ unit.fill_percentage }}%</td>
+                    <td>{% if unit.reading is not none %}{{ "%.1f"|format(unit.reading) }} {{ unit.units }}{% else %}--{% endif %}</td>
+                    <td><span class="home-status-badge {{ unit.status }}">{{ unit.status_label }}</span></td>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -113,27 +132,29 @@
           <h2>Study Breakdown</h2>
           <p>Patient, visit, and sample totals grouped by study.</p>
         </div>
-        <div class="table-wrap">
-          <table class="mini-table">
-            <thead>
-              <tr>
-                <th>Study</th>
-                <th>Patients</th>
-                <th>Visits</th>
-                <th>Samples</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in database_overview.study_breakdown %}
-              <tr>
-                <td>{{ row.study_code }}</td>
-                <td>{{ row.patient_count }}</td>
-                <td>{{ row.visit_count }}</td>
-                <td>{{ row.sample_count }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+        <div class="study-breakdown-grid">
+          {% for row in database_overview.study_breakdown %}
+          <article class="study-breakdown-card">
+            <div class="study-breakdown-head">
+              <span class="study-chip upload">{{ row.study_code }}</span>
+              <span class="study-breakdown-share">{{ row.sample_share }}% of inventory</span>
+            </div>
+            <h3>{{ row.study_name }}</h3>
+            <strong>{{ row.sample_count_display }}</strong>
+            <p>{{ row.patient_count_display }} participants across {{ row.visit_count_display }} visits, centered around {{ row.lead_site }}.</p>
+            <div class="study-breakdown-stats">
+              <div><span>Patients</span><strong>{{ row.patient_count_display }}</strong></div>
+              <div><span>Visits</span><strong>{{ row.visit_count_display }}</strong></div>
+              <div><span>Samples</span><strong>{{ row.sample_count_display }}</strong></div>
+            </div>
+            <div class="study-breakdown-meta">
+              <span>{{ row.phase_focus }}</span>
+              <span>{{ row.avg_samples_per_visit_display }} / visit</span>
+              <span>{{ row.latest_activity }}</span>
+            </div>
+            <div class="study-breakdown-bar"><span style="width: {{ row.sample_share }}%"></span></div>
+          </article>
+          {% endfor %}
         </div>
       </section>
 
