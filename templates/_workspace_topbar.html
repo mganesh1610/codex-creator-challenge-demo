@@ -1,28 +1,34 @@
+{% set profile_name = current_user.display_name or current_user.email %}
 <header class="workspace-bar">
   <div class="workspace-bar-main">
     <a class="workspace-brand" href="/">
-      <span class="workspace-brand-kicker">Biospecimen Operations Workspace</span>
-      <span class="workspace-brand-title">{{ app_title }}</span>
+      <span class="workspace-brand-mark" aria-hidden="true">
+        <svg class="workspace-logo" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <rect x="7" y="7" width="50" height="50" rx="18" stroke="rgba(255, 250, 244, 0.28)" stroke-width="1.5" />
+          <path d="M21 22H41M21 22V42M21 42H41" stroke="#FFF8F1" stroke-width="3" stroke-linecap="round" opacity="0.88" />
+          <circle cx="21" cy="22" r="5" fill="#FFF8F1" />
+          <circle cx="41" cy="22" r="5" fill="#F8D67B" />
+          <circle cx="21" cy="42" r="5" fill="#EAC7D2" />
+          <circle cx="41" cy="42" r="6.5" fill="#FFC627" />
+          <circle cx="41" cy="42" r="14" stroke="#FFC627" stroke-width="3" opacity="0.94" />
+        </svg>
+      </span>
+      <span class="workspace-brand-copy">
+        <span class="workspace-brand-kicker">Biospecimen Operations Workspace</span>
+        <span class="workspace-brand-title">{{ app_title }}</span>
+      </span>
     </a>
-    <div class="workspace-context">
-      <span class="workspace-context-label">{{ topbar_label }}</span>
-      <strong>{{ topbar_title }}</strong>
-      <p>{{ topbar_copy }}</p>
-    </div>
-    <div class="workspace-user-block">
-      <span class="workspace-session-chip">{{ topbar_session_label }}</span>
-      <div class="workspace-profile">
-        <strong>{{ current_user.display_name or current_user.email }}</strong>
-        <span>{{ current_user.email }}</span>
-      </div>
-    </div>
-  </div>
-  <div class="workspace-nav-row">
     <nav class="workspace-nav" aria-label="Workspace navigation">
       {% for item in primary_nav %}
       <a class="workspace-nav-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>
       {% endfor %}
     </nav>
+    <div class="workspace-user-block">
+      <span class="workspace-session-chip">{{ topbar_session_label }}</span>
+      <div class="workspace-profile" title="{{ profile_name }} | {{ current_user.email }}" aria-label="{{ profile_name }} | {{ current_user.email }}">
+        <span class="workspace-avatar" aria-hidden="true">{{ profile_name[:2]|upper }}</span>
+      </div>
+    </div>
   </div>
   {% if topbar_subnav is defined and topbar_subnav %}
   <div class="workspace-subnav-row">
