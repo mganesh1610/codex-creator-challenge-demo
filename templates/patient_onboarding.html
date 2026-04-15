@@ -3,9 +3,11 @@
 <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>{{ app_title }} | Patient Onboarding</title><link rel="stylesheet" href="/static/styles.css" /></head>
 <body>
   <div class="page-shell">
-    <header class="hero"><div><p class="eyebrow">Registry Workspace</p><h1>Patient Onboarding</h1><p class="hero-copy">Create synthetic patient and visit records directly in the public demo registry. Sample-level inventory remains in the Dataloader workspace.</p></div><div class="status-stack"><a class="status-chip ready status-chip-link" href="/">Home</a><a class="status-chip ready status-chip-link" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a><a class="status-chip ready status-chip-link" href="/freezer-monitoring">Freezer Monitoring</a></div></header>
-    <section class="portal-bar"><div class="portal-profile"><div class="portal-profile-meta"><strong>{{ current_user.display_name or current_user.email }}</strong><span class="portal-profile-email">{{ current_user.email }}</span></div></div><div class="actions compact portal-actions"><span class="study-chip upload">Public Demo Session</span></div></section>
-    <nav class="mode-nav">{% for item in primary_nav %}<a class="mode-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>{% endfor %}</nav>
+    {% set topbar_label = "Registry Workspace" %}
+    {% set topbar_title = "Patient Onboarding" %}
+    {% set topbar_copy = "Create patient and visit records in the public demo registry before samples move into intake." %}
+    {% set topbar_session_label = "Public Demo Session" %}
+    {% include "_workspace_topbar.html" %}
     {% if message %}<section class="alert-banner {{ message_tone }}">{{ message }}</section>{% endif %}
     {% if created_visit %}<section class="access-strip"><div class="access-card"><span class="banner-label">Created Visit</span><div class="chip-row"><span class="study-chip upload">Patient {{ created_visit.patient_id }}</span><span class="study-chip upload">Visit {{ created_visit.visit_number }}</span>{% if created_visit.study_code %}<span class="study-chip">{{ created_visit.study_code }}</span>{% endif %}{% if created_visit.phase_code %}<span class="study-chip">{{ created_visit.phase_code }}</span>{% endif %}{% if created_visit.patient_visit_label %}<span class="study-chip">{{ created_visit.patient_visit_label }}</span>{% endif %}</div></div></section>{% endif %}
     <main class="dashboard">

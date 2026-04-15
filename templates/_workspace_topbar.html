@@ -1,0 +1,37 @@
+<header class="workspace-bar">
+  <div class="workspace-bar-main">
+    <a class="workspace-brand" href="/">
+      <span class="workspace-brand-kicker">Biospecimen Operations Workspace</span>
+      <span class="workspace-brand-title">{{ app_title }}</span>
+    </a>
+    <div class="workspace-context">
+      <span class="workspace-context-label">{{ topbar_label }}</span>
+      <strong>{{ topbar_title }}</strong>
+      <p>{{ topbar_copy }}</p>
+    </div>
+    <div class="workspace-user-block">
+      <span class="workspace-session-chip">{{ topbar_session_label }}</span>
+      <div class="workspace-profile">
+        <strong>{{ current_user.display_name or current_user.email }}</strong>
+        <span>{{ current_user.email }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="workspace-nav-row">
+    <nav class="workspace-nav" aria-label="Workspace navigation">
+      {% for item in primary_nav %}
+      <a class="workspace-nav-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+  {% if topbar_subnav is defined and topbar_subnav %}
+  <div class="workspace-subnav-row">
+    <span class="workspace-subnav-label">{{ topbar_subnav_label or "Modes" }}</span>
+    <div class="workspace-subnav">
+      {% for item in topbar_subnav %}
+      <a class="workspace-subnav-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</header>

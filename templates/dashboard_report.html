@@ -8,36 +8,11 @@
 </head>
 <body>
   <div class="page-shell">
-    <header class="hero">
-      <div>
-        <p class="eyebrow">Public Reporting View</p>
-        <h1>Dashboard</h1>
-        <p class="hero-copy">A dedicated reporting page for the synthetic public dataset, with no private embeds, external dashboards, or backend dependencies.</p>
-      </div>
-      <div class="status-stack">
-        <a class="status-chip ready status-chip-link" href="/">Home</a>
-        <a class="status-chip ready status-chip-link" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a>
-        <a class="status-chip ready status-chip-link" href="/freezer-monitoring">Freezer Monitoring</a>
-      </div>
-    </header>
-
-    <section class="portal-bar">
-      <div class="portal-profile">
-        <div class="portal-profile-meta">
-          <strong>{{ current_user.display_name or current_user.email }}</strong>
-          <span class="portal-profile-email">{{ current_user.email }}</span>
-        </div>
-      </div>
-      <div class="actions compact portal-actions">
-        <span class="study-chip upload">Public Demo Session</span>
-      </div>
-    </section>
-
-    <nav class="mode-nav">
-      {% for item in primary_nav %}
-      <a class="mode-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>
-      {% endfor %}
-    </nav>
+    {% set topbar_label = "Reporting Workspace" %}
+    {% set topbar_title = "Dashboard" %}
+    {% set topbar_copy = "Program, sample, and freezer reporting surfaces for the public demo dataset." %}
+    {% set topbar_session_label = "Public Demo Session" %}
+    {% include "_workspace_topbar.html" %}
 
     <main class="dashboard">
       <section class="card wide">

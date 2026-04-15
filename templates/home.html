@@ -9,19 +9,11 @@
 </head>
 <body>
   <div class="page-shell">
-    <header class="hero">
-      <div>
-        <p class="eyebrow">Biospecimen Operations Workspace</p>
-        <h1>{{ app_title }}</h1>
-        <p class="hero-copy">This landing page helps coordinators, lab teams, and program leads move from patient intake to workbook review, reporting, and inventory oversight in one place.</p>
-      </div>
-      <div class="status-stack">
-        <a class="status-chip ready status-chip-link" href="/patient-onboarding">Patient Onboarding</a>
-        <a class="status-chip ready status-chip-link" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a>
-        <a class="status-chip ready status-chip-link" href="/freezer-monitoring">Freezer Monitoring</a>
-      </div>
-    </header>
-    <section class="portal-bar"><div class="portal-profile"><div class="portal-profile-meta"><strong>{{ current_user.display_name or current_user.email }}</strong><span class="portal-profile-email">{{ current_user.email }}</span></div></div><div class="actions compact portal-actions"><span class="study-chip upload">Public Demo Session</span></div></section>
+    {% set topbar_label = "Operational Home" %}
+    {% set topbar_title = "Unified Intake and Monitoring" %}
+    {% set topbar_copy = "Patient intake, workbook review, freezer status, and reporting in one coordinated workspace." %}
+    {% set topbar_session_label = "Public Demo Session" %}
+    {% include "_workspace_topbar.html" %}
     <main class="dashboard">
       <section class="card wide">
         <div class="card-head">
