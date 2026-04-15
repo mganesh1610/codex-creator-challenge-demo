@@ -16,98 +16,136 @@
     {% include "_workspace_topbar.html" %}
 
     <section class="access-strip">
-      <div class="access-card">
-        <span class="banner-label">Scope</span>
-        <p class="freezer-intro-copy">Review current alarm states, threshold pressure, program coverage, and unit status across the monitored storage network.</p>
-        <div class="chip-row">
-          {% for code in freezer_overview.study_codes %}
-          <span class="study-chip upload">{{ code }}</span>
-          {% endfor %}
+      <div class="access-card freezer-intro-card">
+        <div>
+          <span class="banner-label">Scope</span>
+          <p class="freezer-intro-copy">Review current alarm states, threshold pressure, program coverage, and unit status across the monitored storage network.</p>
+          <div class="chip-row">
+            {% for code in freezer_overview.study_codes %}
+            <span class="study-chip upload">{{ code }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="actions compact freezer-intro-actions">
+          <button class="button secondary freezer-pane-toggle" id="freezer-pane-toggle" type="button" aria-controls="freezer-side-pane" aria-expanded="false">Open Storage Pane</button>
         </div>
       </div>
     </section>
 
-    <section class="freezer-summary-strip" id="freezer-summary-strip"></section>
+    <div class="freezer-side-backdrop hidden" id="freezer-pane-backdrop"></div>
+    <aside class="freezer-side-pane" id="freezer-side-pane" aria-hidden="true">
+      <div class="freezer-side-pane-shell">
+        <div class="freezer-side-pane-head">
+          <div>
+            <span class="banner-label">Storage Pane</span>
+            <h2>Network Controls</h2>
+            <p>Filters, program scope, refresh settings, and storage summary stay tucked into the right-side utility pane.</p>
+          </div>
+          <button class="freezer-pane-close" id="freezer-pane-close" type="button" aria-label="Close storage pane">Close</button>
+        </div>
+        <div class="freezer-side-pane-body">
+          <section class="freezer-side-group">
+            <div class="freezer-side-group-head">
+              <h3>Network Snapshot</h3>
+              <span>Live rollup</span>
+            </div>
+            <section class="freezer-summary-strip freezer-side-summary" id="freezer-summary-strip"></section>
+          </section>
 
-    <section class="freezer-controls">
-      <div class="freezer-control">
-        <label for="freezer-search">Search</label>
-        <input id="freezer-search" type="search" placeholder="Freezer ID, zone, study, specimen focus" />
-      </div>
-      <div class="freezer-control">
-        <label for="freezer-status-filter">Status</label>
-        <select id="freezer-status-filter">
-          <option value="all">All units</option>
-          <option value="critical">Critical only</option>
-          <option value="warning">Warnings only</option>
-          <option value="stale">Stale only</option>
-          <option value="no_feed">Manual review</option>
-          <option value="normal">Normal only</option>
-        </select>
-      </div>
-      <div class="freezer-control">
-        <label for="freezer-zone-filter">Zone</label>
-        <select id="freezer-zone-filter">
-          <option value="all">All zones</option>
-        </select>
-      </div>
-      <div class="freezer-control">
-        <label for="freezer-building-filter">Building</label>
-        <select id="freezer-building-filter">
-          <option value="all">All buildings</option>
-        </select>
-      </div>
-      <div class="freezer-control">
-        <label for="freezer-study-filter">Program</label>
-        <select id="freezer-study-filter">
-          <option value="all">All programs</option>
-        </select>
-      </div>
-      <div class="freezer-control">
-        <label for="freezer-sort-by">Sort</label>
-        <select id="freezer-sort-by">
-          <option value="severity">Severity</option>
-          <option value="building">Building</option>
-          <option value="temperature">Temperature</option>
-          <option value="freshness">Freshness</option>
-          <option value="capacity">Inventory load</option>
-        </select>
-      </div>
-      <div class="freezer-control">
-        <label for="freezer-refresh-interval">Refresh interval</label>
-        <select id="freezer-refresh-interval">
-          <option value="300000">5 min</option>
-          <option value="900000" selected>15 min</option>
-          <option value="1800000">30 min</option>
-        </select>
-      </div>
-      <div class="freezer-control freezer-mode-control">
-        <label>Refresh mode</label>
-        <div class="freezer-mode-toggle">
-          <button class="freezer-mode-button active" id="freezer-auto-refresh" type="button">Auto</button>
-          <button class="freezer-mode-button" id="freezer-manual-refresh" type="button">Manual</button>
+          <section class="freezer-side-group">
+            <div class="freezer-side-group-head">
+              <h3>Filters and Sort</h3>
+              <span>Refine the wall</span>
+            </div>
+            <section class="freezer-controls freezer-side-controls">
+              <div class="freezer-control">
+                <label for="freezer-search">Search</label>
+                <input id="freezer-search" type="search" placeholder="Freezer ID, zone, study, specimen focus" />
+              </div>
+              <div class="freezer-control">
+                <label for="freezer-status-filter">Status</label>
+                <select id="freezer-status-filter">
+                  <option value="all">All units</option>
+                  <option value="critical">Critical only</option>
+                  <option value="warning">Warnings only</option>
+                  <option value="stale">Stale only</option>
+                  <option value="no_feed">Manual review</option>
+                  <option value="normal">Normal only</option>
+                </select>
+              </div>
+              <div class="freezer-control">
+                <label for="freezer-zone-filter">Zone</label>
+                <select id="freezer-zone-filter">
+                  <option value="all">All zones</option>
+                </select>
+              </div>
+              <div class="freezer-control">
+                <label for="freezer-building-filter">Building</label>
+                <select id="freezer-building-filter">
+                  <option value="all">All buildings</option>
+                </select>
+              </div>
+              <div class="freezer-control">
+                <label for="freezer-study-filter">Program</label>
+                <select id="freezer-study-filter">
+                  <option value="all">All programs</option>
+                </select>
+              </div>
+              <div class="freezer-control">
+                <label for="freezer-sort-by">Sort</label>
+                <select id="freezer-sort-by">
+                  <option value="severity">Severity</option>
+                  <option value="building">Building</option>
+                  <option value="temperature">Temperature</option>
+                  <option value="freshness">Freshness</option>
+                  <option value="capacity">Inventory load</option>
+                </select>
+              </div>
+              <div class="freezer-control">
+                <label for="freezer-refresh-interval">Refresh interval</label>
+                <select id="freezer-refresh-interval">
+                  <option value="300000">5 min</option>
+                  <option value="900000" selected>15 min</option>
+                  <option value="1800000">30 min</option>
+                </select>
+              </div>
+              <div class="freezer-control freezer-mode-control">
+                <label>Refresh mode</label>
+                <div class="freezer-mode-toggle">
+                  <button class="freezer-mode-button active" id="freezer-auto-refresh" type="button">Auto</button>
+                  <button class="freezer-mode-button" id="freezer-manual-refresh" type="button">Manual</button>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="freezer-side-group">
+            <div class="freezer-side-group-head">
+              <h3>Live Status</h3>
+              <span>Current run state</span>
+            </div>
+            <section class="freezer-quick-status freezer-side-status">
+              <article class="freezer-status-card">
+                <span class="banner-label">Last Refresh</span>
+                <strong id="freezer-last-refresh">Loading...</strong>
+              </article>
+              <article class="freezer-status-card">
+                <span class="banner-label">Monitoring Layer</span>
+                <strong id="freezer-data-mode">Environmental feed</strong>
+              </article>
+              <article class="freezer-status-card">
+                <span class="banner-label">Refresh Mode</span>
+                <strong id="freezer-refresh-label">Auto</strong>
+              </article>
+              <article class="freezer-status-card">
+                <span class="banner-label">Programs Linked</span>
+                <strong>{{ freezer_overview.study_codes | join(", ") }}</strong>
+              </article>
+            </section>
+          </section>
         </div>
       </div>
-    </section>
-
-    <section class="freezer-quick-status">
-      <article class="freezer-status-card">
-        <span class="banner-label">Last Refresh</span>
-        <strong id="freezer-last-refresh">Loading...</strong>
-      </article>
-      <article class="freezer-status-card">
-        <span class="banner-label">Monitoring Layer</span>
-        <strong id="freezer-data-mode">Environmental feed</strong>
-      </article>
-      <article class="freezer-status-card">
-        <span class="banner-label">Refresh Mode</span>
-        <strong id="freezer-refresh-label">Auto</strong>
-      </article>
-      <article class="freezer-status-card">
-        <span class="banner-label">Programs Linked</span>
-        <strong>{{ freezer_overview.study_codes | join(", ") }}</strong>
-      </article>
-    </section>
+    </aside>
 
     <main class="freezer-grid">
       <section class="freezer-panel">

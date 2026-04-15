@@ -8,6 +8,10 @@ const freezerState = {
 };
 
 const freezerEls = {
+  paneToggle: document.getElementById("freezer-pane-toggle"),
+  paneClose: document.getElementById("freezer-pane-close"),
+  paneBackdrop: document.getElementById("freezer-pane-backdrop"),
+  pane: document.getElementById("freezer-side-pane"),
   summaryStrip: document.getElementById("freezer-summary-strip"),
   search: document.getElementById("freezer-search"),
   statusFilter: document.getElementById("freezer-status-filter"),
@@ -33,6 +37,26 @@ const freezerEls = {
 };
 
 let freezerScrollFrame = null;
+let freezerPaneOpen = false;
+
+function freezerSyncPaneOffset() {
+  const workspaceBar = document.querySelector(".workspace-bar");
+  const topOffset = workspaceBar ? Math.ceil(workspaceBar.getBoundingClientRect().height + 10) : 88;
+  document.documentElement.style.setProperty("--freezer-pane-top", `${topOffset}px`);
+}
+
+function freezerSetPaneOpen(isOpen) {
+  freezerPaneOpen = Boolean(isOpen);
+  freezerEls.pane?.classList.toggle("open", freezerPaneOpen);
+  freezerEls.paneBackdrop?.classList.toggle("hidden", !freezerPaneOpen);
+  freezerEls.paneToggle?.setAttribute("aria-expanded", freezerPaneOpen ? "true" : "false");
+  freezerEls.pane?.setAttribute("aria-hidden", freezerPaneOpen ? "false" : "true");
+  document.body.classList.toggle("freezer-pane-open", freezerPaneOpen);
+}
+
+function freezerTogglePane() {
+  freezerSetPaneOpen(!freezerPaneOpen);
+}
 
 function freezerEscapeHtml(value) {
   return String(value ?? "")
@@ -450,6 +474,9 @@ async function freezerSelectUnit(freezerId) {
       ${freezerRenderChart(payload.history || [], freezer)}
     `;
     freezerInitializeChartTooltip(freezerEls.detailCard);
+    if (window.innerWidth <= 860) {
+      freezerSetPaneOpen(false);
+    }
   } catch (error) {
     freezerEls.detailBadge.textContent = "Unavailable";
     freezerEls.detailCard.classList.remove("freezer-detail-empty");
@@ -557,12 +584,25 @@ freezerEls.refreshInterval.addEventListener("change", freezerScheduleRefresh);
 freezerEls.autoRefreshButton.addEventListener("click", () => freezerSetRefreshMode("auto"));
 freezerEls.manualRefreshButton.addEventListener("click", () => freezerSetRefreshMode("manual"));
 freezerEls.refreshNowButton.addEventListener("click", () => freezerLoadDashboard());
-window.addEventListener("resize", freezerFitScrollablePanels);
+freezerEls.paneToggle?.addEventListener("click", freezerTogglePane);
+freezerEls.paneClose?.addEventListener("click", () => freezerSetPaneOpen(false));
+freezerEls.paneBackdrop?.addEventListener("click", () => freezerSetPaneOpen(false));
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && freezerPaneOpen) {
+    freezerSetPaneOpen(false);
+  }
+});
+window.addEventListener("resize", () => {
+  freezerSyncPaneOffset();
+  freezerFitScrollablePanels();
+});
 window.addEventListener("scroll", freezerFitScrollablePanels, { passive: true });
 
+freezerSyncPaneOffset();
 freezerLoadDashboard()
   .then(() => {
     freezerSetRefreshMode("auto");
+    freezerSyncPaneOffset();
     freezerFitScrollablePanels();
   })
   .catch(() => {
