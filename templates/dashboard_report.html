@@ -15,15 +15,18 @@
     {% include "_workspace_topbar.html" %}
 
     <main class="dashboard">
-      <section class="card wide">
+      <section class="card wide snapshot-section snapshot-section-reporting">
         <div class="card-head">
           <h2>Reporting Snapshot</h2>
           <p>These headline metrics are generated from the in-memory public demo dataset.</p>
         </div>
-        <div class="metric-grid">
+        <div class="metric-grid snapshot-metric-grid">
           {% for metric in database_overview.metrics %}
-          <article class="metric-card">
-            <span class="banner-label">{{ metric.label }}</span>
+          <article class="metric-card snapshot-metric-card">
+            <div class="snapshot-metric-head">
+              <span class="banner-label">{{ metric.label }}</span>
+              <span class="snapshot-metric-accent" aria-hidden="true"></span>
+            </div>
             <strong>{{ metric.value }}</strong>
             <p>{{ metric.detail }}</p>
           </article>

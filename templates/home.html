@@ -212,7 +212,24 @@
           </div>
         </div>
       </section>
-      <section class="card wide"><div class="card-head"><h2>Operational Snapshot</h2><p>These counts give teams a quick read on program coverage, site footprint, participant volume, visit activity, and specimen inventory scale.</p></div><div class="metric-grid">{% for metric in database_overview.metrics %}<article class="metric-card"><span class="banner-label">{{ metric.label }}</span><strong>{{ metric.value }}</strong><p>{{ metric.detail }}</p></article>{% endfor %}</div></section>
+      <section class="card wide snapshot-section snapshot-section-operational">
+        <div class="card-head">
+          <h2>Operational Snapshot</h2>
+          <p>These counts give teams a quick read on program coverage, site footprint, participant volume, visit activity, and specimen inventory scale.</p>
+        </div>
+        <div class="metric-grid snapshot-metric-grid">
+          {% for metric in database_overview.metrics %}
+          <article class="metric-card snapshot-metric-card">
+            <div class="snapshot-metric-head">
+              <span class="banner-label">{{ metric.label }}</span>
+              <span class="snapshot-metric-accent" aria-hidden="true"></span>
+            </div>
+            <strong>{{ metric.value }}</strong>
+            <p>{{ metric.detail }}</p>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
     </main>
   </div>
   <script>
