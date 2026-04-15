@@ -241,7 +241,27 @@ def access_scope() -> dict[str, Any]:
 
 def primary_nav(active: str, mode: str = DEFAULT_UPLOAD_MODE) -> list[dict[str, Any]]:
     mode = normalize_upload_mode(mode)
-    return [{"label": "Home", "href": "/", "active": active == "home"}, {"label": "Patient Onboarding", "href": "/patient-onboarding", "active": active == "patient_onboarding"}, {"label": "Dataloader", "href": f"/dataloader?mode={mode}", "active": active == "dataloader"}, {"label": "Freezer Monitoring", "href": "/freezer-monitoring", "active": active == "freezer_monitoring"}, {"label": "AI Report Generator", "href": f"/reports/ai?mode={mode}", "active": active == "ai_report"}, {"label": "Dashboard", "href": f"/reports/dashboard?mode={mode}", "active": active == "dashboard"}]
+    dataloader_children = [
+        {
+            "label": value["label"],
+            "href": f"/dataloader?mode={key}",
+            "active": active == "dataloader" and key == mode,
+        }
+        for key, value in UPLOAD_MODES.items()
+    ]
+    return [
+        {"label": "Home", "href": "/", "active": active == "home"},
+        {"label": "Patient Onboarding", "href": "/patient-onboarding", "active": active == "patient_onboarding"},
+        {
+            "label": "Dataloader",
+            "href": f"/dataloader?mode={mode}",
+            "active": active == "dataloader",
+            "children": dataloader_children,
+        },
+        {"label": "Freezer Monitoring", "href": "/freezer-monitoring", "active": active == "freezer_monitoring"},
+        {"label": "AI Report Generator", "href": f"/reports/ai?mode={mode}", "active": active == "ai_report"},
+        {"label": "Dashboard", "href": f"/reports/dashboard?mode={mode}", "active": active == "dashboard"},
+    ]
 
 
 def upload_mode_tabs(mode: str) -> list[dict[str, Any]]:

@@ -8,11 +8,144 @@
     {% set topbar_copy = "Ask plain-language operational questions and review the deterministic public-demo query plan." %}
     {% set topbar_session_label = "Public Demo Session" %}
     {% include "_workspace_topbar.html" %}
-    <main class="dashboard">
-      <section class="card wide"><div class="card-head"><h2>Ask The Query Agent</h2><p>Select the fields you care about, then ask in plain English. The public demo uses a deterministic query plan against synthetic records.</p></div><div id="query-agent-state"></div><div class="study-filter-block"><span class="label-inline">Query programs</span><div class="chip-row" id="query-study-filters"></div></div><div class="query-layout"><div><label class="label" for="question">Question</label><textarea id="question" rows="5" placeholder="Example: Show me retained plasma samples collected in 2026."></textarea><div class="query-action-row"><button class="button primary" id="query-button" type="button">Generate / Run Query</button><button class="button secondary" id="grounded-answer-button" type="button">Grounded Answer</button></div></div><div><div class="label">Selectable Fields</div><div class="field-grid">{% for field in field_catalog %}<label class="field-pill"><input type="checkbox" value="{{ field.key }}" {% if loop.index <= 8 %}checked{% endif %}/><span>{{ field.label }}</span><small>{{ field.category }}</small></label>{% endfor %}</div></div></div></section>
-      <section class="card wide"><div class="card-head"><h2>Grounded Answer</h2><p>The grounded path summarizes only the synthetic records selected for the current public demo question.</p></div><p class="status-text" id="grounded-status">Grounded answer path idle.</p><div class="query-meta" id="grounded-meta"></div><div class="query-explanation" id="grounded-notes"></div><pre class="grounded-answer-box" id="grounded-answer-box">No grounded answer generated yet.</pre><details class="context-panel"><summary>Retrieved Context</summary><pre class="grounded-context-box" id="grounded-context-box">No context retrieved yet.</pre></details></section>
-      <section class="card wide"><div class="card-head"><h2>Report Output</h2><p>The result table below shows the rows returned by the public demo query plan.</p></div><p class="status-text" id="query-status">Query agent idle.</p><div class="query-meta" id="query-meta"></div><div class="query-explanation" id="query-explanation"></div><div class="table-wrap"><table id="results-table"></table></div></section>
-      <section class="card wide"><div class="card-head"><h2>Generated Plan</h2><p>The report agent always shows the execution plan it used.</p></div><pre class="sql-box" id="sql-box">No query generated yet.</pre></section>
+    <main class="dashboard ai-report-dashboard">
+      <section class="card wide ai-report-intro-card">
+        <div class="page-intro-grid">
+          <div class="page-intro-copy">
+            <span class="page-eyebrow">Operational questions</span>
+            <h2>Plain-language reporting studio</h2>
+            <p>Ask about participants, visits, samples, and storage activity, then inspect the deterministic plan and grounded context that shaped the answer.</p>
+            <div class="chip-row">
+              <span class="study-chip upload">Grounded answers</span>
+              <span class="study-chip">Study filters</span>
+              <span class="study-chip">Execution plan</span>
+            </div>
+          </div>
+          <div class="page-intro-aside">
+            <article class="page-intro-note">
+              <span>Coverage</span>
+              <strong>Participants, visits, inventory</strong>
+              <p>Query the public dataset across registry, intake, and freezer reporting surfaces.</p>
+            </article>
+            <article class="page-intro-note">
+              <span>Modes</span>
+              <strong>SQL + grounded narrative</strong>
+              <p>Use the generated plan for rows and metrics, or the grounded path for a concise answer with retrieved context.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="card ai-question-card">
+        <div class="card-head">
+          <h2>Ask The Query Agent</h2>
+          <p>Select the fields you care about, then ask in plain English. The public demo uses a deterministic query plan against synthetic records.</p>
+        </div>
+        <div id="query-agent-state"></div>
+        <div class="ai-query-stage">
+          <div class="ai-query-input-panel">
+            <label class="label" for="question">Question</label>
+            <textarea id="question" rows="5" placeholder="Example: Show me retained plasma samples collected in 2026."></textarea>
+            <div class="query-action-row">
+              <button class="button primary" id="query-button" type="button">Generate / Run Query</button>
+              <button class="button secondary" id="grounded-answer-button" type="button">Grounded Answer</button>
+            </div>
+            <div class="query-prompt-rack">
+              <button class="query-prompt-chip" type="button" data-prompt="Show retained plasma samples collected in 2026 by program.">
+                <span>Inventory scan</span>
+                <strong>Retained plasma by program</strong>
+                <small>Filter sample type, year, and disposition.</small>
+              </button>
+              <button class="query-prompt-chip" type="button" data-prompt="Which sites have the highest visit volume this quarter?">
+                <span>Site volume</span>
+                <strong>Highest-activity collection sites</strong>
+                <small>Compare visit activity across the current footprint.</small>
+              </button>
+              <button class="query-prompt-chip" type="button" data-prompt="Summarize freezer-linked samples for the LONG program and flag any stale units.">
+                <span>Cold storage</span>
+                <strong>LONG program freezer summary</strong>
+                <small>Combine program scope with freezer status context.</small>
+              </button>
+            </div>
+          </div>
+          <div class="ai-query-filter-panel">
+            <div class="study-filter-block">
+              <span class="label-inline">Query programs</span>
+              <div class="chip-row" id="query-study-filters"></div>
+            </div>
+            <div class="label">Selectable Fields</div>
+            <div class="field-grid ai-field-grid">
+              {% for field in field_catalog %}
+              <label class="field-pill">
+                <input type="checkbox" value="{{ field.key }}" {% if loop.index <= 8 %}checked{% endif %}/>
+                <span>{{ field.label }}</span>
+                <small>{{ field.category }}</small>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card ai-guide-card">
+        <div class="card-head">
+          <h2>Question Recipes</h2>
+          <p>Start with a pattern and let the agent translate it into the deterministic public-demo plan.</p>
+        </div>
+        <div class="ai-recipe-list">
+          <article class="ai-recipe-card">
+            <span class="banner-label">Program scope</span>
+            <strong>Compare workload by study</strong>
+            <p>Ask for patient, visit, or sample totals side by side across RESP, IMM, and LONG.</p>
+          </article>
+          <article class="ai-recipe-card">
+            <span class="banner-label">Inventory lens</span>
+            <strong>Find retained or shared inventory</strong>
+            <p>Filter by sample type, collection year, disposition state, and site in one request.</p>
+          </article>
+          <article class="ai-recipe-card">
+            <span class="banner-label">Operations status</span>
+            <strong>Blend reporting with freezer activity</strong>
+            <p>Ask for program volume together with stale, warning, or alarm-state units.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="card wide ai-results-card">
+        <div class="card-head">
+          <h2>Report Output</h2>
+          <p>The result table below shows the rows returned by the public demo query plan.</p>
+        </div>
+        <p class="status-text" id="query-status">Query agent idle.</p>
+        <div class="query-meta" id="query-meta"></div>
+        <div class="query-explanation" id="query-explanation"></div>
+        <div class="table-wrap">
+          <table id="results-table"></table>
+        </div>
+      </section>
+
+      <section class="card ai-grounded-card">
+        <div class="card-head">
+          <h2>Grounded Answer</h2>
+          <p>The grounded path summarizes only the synthetic records selected for the current public demo question.</p>
+        </div>
+        <p class="status-text" id="grounded-status">Grounded answer path idle.</p>
+        <div class="query-meta" id="grounded-meta"></div>
+        <div class="query-explanation" id="grounded-notes"></div>
+        <pre class="grounded-answer-box" id="grounded-answer-box">No grounded answer generated yet.</pre>
+        <details class="context-panel">
+          <summary>Retrieved Context</summary>
+          <pre class="grounded-context-box" id="grounded-context-box">No context retrieved yet.</pre>
+        </details>
+      </section>
+
+      <section class="card ai-plan-card">
+        <div class="card-head">
+          <h2>Generated Plan</h2>
+          <p>The report agent always shows the execution plan it used.</p>
+        </div>
+        <pre class="sql-box" id="sql-box">No query generated yet.</pre>
+      </section>
     </main>
   </div>
   <script>

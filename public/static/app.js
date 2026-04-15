@@ -80,6 +80,7 @@ const groundedMeta = document.getElementById("grounded-meta");
 const groundedNotes = document.getElementById("grounded-notes");
 const groundedAnswerBox = document.getElementById("grounded-answer-box");
 const groundedContextBox = document.getElementById("grounded-context-box");
+const queryPromptChips = Array.from(document.querySelectorAll(".query-prompt-chip"));
 const reviewModal = document.getElementById("review-modal");
 const reviewModalList = document.getElementById("review-modal-list");
 const reviewModalClose = document.getElementById("review-modal-close");
@@ -257,6 +258,16 @@ function selectedFields() {
 
 function availableStudyCodes() {
   return state.runtimeStatus?.current_user?.view_study_codes || [];
+}
+
+function applyPromptSuggestion(prompt) {
+  if (!questionInput || !prompt) return;
+  questionInput.value = prompt;
+  questionInput.focus();
+  if (typeof questionInput.setSelectionRange === "function") {
+    const caret = questionInput.value.length;
+    questionInput.setSelectionRange(caret, caret);
+  }
 }
 
 function formatStudyCodes(value) {
@@ -1947,6 +1958,11 @@ if (markAllSentButton) markAllSentButton.addEventListener("click", () => applyBu
 if (ignoreFlaggedButton) ignoreFlaggedButton.addEventListener("click", () => applyBulkAction("IGNORE"));
 if (queryButton) queryButton.addEventListener("click", runQuery);
 if (groundedAnswerButton) groundedAnswerButton.addEventListener("click", runGroundedAnswer);
+queryPromptChips.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    applyPromptSuggestion(chip.dataset.prompt || chip.textContent || "");
+  });
+});
 if (reviewModalClose) reviewModalClose.addEventListener("click", closeReviewModal);
 if (previewModalClose) previewModalClose.addEventListener("click", closePreviewModal);
 if (headerMappingClose) headerMappingClose.addEventListener("click", closeHeaderMappingModal);
