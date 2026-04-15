@@ -112,7 +112,6 @@
           {% endfor %}
         </div>
       </section>
-      <section class="card wide"><div class="card-head"><h2>Operational Snapshot</h2><p>These counts give teams a quick read on program coverage, site footprint, participant volume, visit activity, and specimen inventory scale.</p></div><div class="metric-grid">{% for metric in database_overview.metrics %}<article class="metric-card"><span class="banner-label">{{ metric.label }}</span><strong>{{ metric.value }}</strong><p>{{ metric.detail }}</p></article>{% endfor %}</div></section>
       <section class="card wide home-study-breakdown-section">
         <div class="card-head">
           <h2>Study Breakdown</h2>
@@ -187,13 +186,13 @@
             <div class="table-wrap cold-storage-table-wrap">
               <table class="mini-table cold-storage-mini-table">
                 <thead>
-                  <tr>
-                    <th>Freezer</th>
-                    <th>Location</th>
+                 <tr>
+                   <th>Freezer</th>
+                   <th>Location</th>
+                    <th>Status</th>
                     <th>Programs</th>
                     <th>Fill</th>
                     <th>Temp</th>
-                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -201,10 +200,10 @@
                   <tr>
                     <td><strong>{{ unit.display_id }}</strong><span class="table-note">{{ unit.name }}</span></td>
                     <td>{{ unit.building_name }}<span class="table-note">{{ unit.zone }}</span></td>
+                    <td><span class="home-status-badge {{ unit.status }}">{{ unit.status_label }}</span></td>
                     <td>{{ unit.study_codes | join(" / ") }}</td>
                     <td>{{ unit.fill_percentage }}%</td>
                     <td>{% if unit.reading is not none %}{{ "%.1f"|format(unit.reading) }} {{ unit.units }}{% else %}--{% endif %}</td>
-                    <td><span class="home-status-badge {{ unit.status }}">{{ unit.status_label }}</span></td>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -213,6 +212,7 @@
           </div>
         </div>
       </section>
+      <section class="card wide"><div class="card-head"><h2>Operational Snapshot</h2><p>These counts give teams a quick read on program coverage, site footprint, participant volume, visit activity, and specimen inventory scale.</p></div><div class="metric-grid">{% for metric in database_overview.metrics %}<article class="metric-card"><span class="banner-label">{{ metric.label }}</span><strong>{{ metric.value }}</strong><p>{{ metric.detail }}</p></article>{% endfor %}</div></section>
     </main>
   </div>
   <script>

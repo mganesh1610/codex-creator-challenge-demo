@@ -109,11 +109,13 @@ body.freezer-pane-open {
   border-radius: 18px;
   border: 1px solid rgba(140, 29, 64, 0.08);
   background: rgba(255, 255, 255, 0.62);
+  min-width: 0;
 }
 
 .freezer-side-pane-body {
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 14px;
   display: grid;
   gap: 14px;
@@ -134,17 +136,6 @@ body.freezer-pane-open {
 .freezer-side-group-head span {
   color: var(--ink-soft);
   font-size: 0.78rem;
-}
-
-.freezer-side-summary {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-bottom: 0;
-}
-
-.freezer-side-controls,
-.freezer-side-status {
-  grid-template-columns: 1fr;
-  margin-bottom: 0;
 }
 
 .freezer-summary-strip,
@@ -215,6 +206,25 @@ body.freezer-pane-open {
   grid-template-columns: repeat(8, minmax(112px, 1fr));
   gap: 10px;
   margin-bottom: 14px;
+}
+
+.freezer-summary-strip.freezer-side-summary,
+.freezer-quick-status.freezer-side-status,
+.freezer-controls.freezer-side-controls {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.freezer-summary-strip.freezer-side-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.freezer-quick-status.freezer-side-status {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.freezer-controls.freezer-side-controls {
+  grid-template-columns: 1fr;
 }
 
 .freezer-control {
@@ -875,7 +885,8 @@ body.freezer-pane-open {
     width: calc(100vw - 16px);
   }
 
-  .freezer-side-summary {
+  .freezer-summary-strip.freezer-side-summary,
+  .freezer-quick-status.freezer-side-status {
     grid-template-columns: 1fr;
   }
 
@@ -914,10 +925,20 @@ body.freezer-pane-open {
 
   .freezer-side-pane-head {
     padding: 16px 16px 12px;
+    gap: 12px;
   }
 
   .freezer-side-pane-body {
     padding: 12px;
+  }
+
+  .freezer-side-pane-head p {
+    max-width: 24ch;
+  }
+
+  .freezer-pane-close {
+    min-width: 72px;
+    padding: 8px 10px;
   }
 }
 
