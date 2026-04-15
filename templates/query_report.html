@@ -73,15 +73,17 @@
               <span class="label-inline">Query programs</span>
               <div class="chip-row" id="query-study-filters"></div>
             </div>
-            <div class="label">Selectable Fields</div>
-            <div class="field-grid ai-field-grid">
-              {% for field in field_catalog %}
-              <label class="field-pill">
-                <input type="checkbox" value="{{ field.key }}" {% if loop.index <= 8 %}checked{% endif %}/>
-                <span>{{ field.label }}</span>
-                <small>{{ field.category }}</small>
-              </label>
-              {% endfor %}
+            <div class="ai-field-catalog">
+              <div class="label">Selectable Fields</div>
+              <div class="field-grid ai-field-grid">
+                {% for field in field_catalog %}
+                <label class="field-pill">
+                  <input type="checkbox" value="{{ field.key }}" {% if loop.index <= 8 %}checked{% endif %}/>
+                  <span>{{ field.label }}</span>
+                  <small>{{ field.category }}</small>
+                </label>
+                {% endfor %}
+              </div>
             </div>
           </div>
         </div>

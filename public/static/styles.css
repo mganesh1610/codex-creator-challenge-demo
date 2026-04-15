@@ -1449,6 +1449,17 @@ tbody tr.row-info {
   align-content: start;
 }
 
+.ai-query-filter-panel {
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.ai-field-catalog {
+  display: grid;
+  gap: 12px;
+  min-height: 0;
+}
+
 .ai-query-input-panel textarea {
   min-height: 152px;
   border-radius: 22px;
@@ -1460,6 +1471,13 @@ tbody tr.row-info {
 
 .ai-field-grid {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-content: start;
+  min-height: 0;
+  max-height: 620px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  scrollbar-gutter: stable;
 }
 
 .query-prompt-rack {
