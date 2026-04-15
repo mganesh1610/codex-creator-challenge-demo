@@ -319,6 +319,19 @@ body.freezer-pane-open {
   margin-bottom: 12px;
 }
 
+.freezer-panel-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.freezer-panel-head-actions .freezer-pane-toggle {
+  flex: 0 0 auto;
+}
+
 .freezer-panel-head span {
   color: var(--ink-soft);
   font-size: 0.82rem;
@@ -883,6 +896,17 @@ body.freezer-pane-open {
     right: 8px;
     bottom: 8px;
     width: calc(100vw - 16px);
+  }
+
+  .freezer-panel-head {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .freezer-panel-head-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
   }
 
   .freezer-summary-strip.freezer-side-summary,

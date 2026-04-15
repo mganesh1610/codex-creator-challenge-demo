@@ -174,18 +174,6 @@ function freezerGetFilteredUnits() {
 function freezerRenderSummary(summary, freezers) {
   const cards = [
     {
-      label: "Units Monitored",
-      value: summary.total,
-      detail: "Cold-storage units currently visible in the monitoring wall.",
-      tone: "",
-    },
-    {
-      label: "Critical",
-      value: summary.critical,
-      detail: "Units currently outside threshold and needing operator response.",
-      tone: "critical",
-    },
-    {
       label: "Warnings",
       value: summary.warning,
       detail: "Units approaching threshold and flagged for closer review.",
@@ -541,7 +529,9 @@ function freezerRenderFilteredViews() {
 
 function freezerSetRefreshMode(mode) {
   freezerState.refreshMode = mode;
-  freezerEls.refreshLabel.textContent = mode === "auto" ? "Auto" : "Manual";
+  if (freezerEls.refreshLabel) {
+    freezerEls.refreshLabel.textContent = mode === "auto" ? "Auto" : "Manual";
+  }
   freezerEls.autoRefreshButton.classList.toggle("active", mode === "auto");
   freezerEls.manualRefreshButton.classList.toggle("active", mode === "manual");
   freezerEls.manualRefreshButton.classList.toggle("manual", mode === "manual");

@@ -15,33 +15,16 @@
     {% set topbar_session_label = "Cold Storage Network" %}
     {% include "_workspace_topbar.html" %}
 
-    <section class="access-strip">
-      <div class="access-card freezer-intro-card">
-        <div>
-          <span class="banner-label">Scope</span>
-          <p class="freezer-intro-copy">Review current alarm states, threshold pressure, program coverage, and unit status across the monitored storage network.</p>
-          <div class="chip-row">
-            {% for code in freezer_overview.study_codes %}
-            <span class="study-chip upload">{{ code }}</span>
-            {% endfor %}
-          </div>
-        </div>
-        <div class="actions compact freezer-intro-actions">
-          <button class="button secondary freezer-pane-toggle" id="freezer-pane-toggle" type="button" aria-controls="freezer-side-pane" aria-expanded="false">Open Storage Pane</button>
-        </div>
-      </div>
-    </section>
-
     <div class="freezer-side-backdrop hidden" id="freezer-pane-backdrop"></div>
     <aside class="freezer-side-pane" id="freezer-side-pane" aria-hidden="true">
       <div class="freezer-side-pane-shell">
         <div class="freezer-side-pane-head">
           <div>
-            <span class="banner-label">Storage Pane</span>
-            <h2>Network Controls</h2>
-            <p>Filters, program scope, refresh settings, and storage summary stay tucked into the right-side utility pane.</p>
+            <span class="banner-label">Filter Pane</span>
+            <h2>Filter Controls</h2>
+            <p>Zone, building, program, and refresh controls stay tucked into the right-side utility pane.</p>
           </div>
-          <button class="freezer-pane-close" id="freezer-pane-close" type="button" aria-label="Close storage pane">Close</button>
+          <button class="freezer-pane-close" id="freezer-pane-close" type="button" aria-label="Close filter pane">Close</button>
         </div>
         <div class="freezer-side-pane-body">
           <section class="freezer-side-group">
@@ -134,10 +117,6 @@
                 <strong id="freezer-data-mode">Environmental feed</strong>
               </article>
               <article class="freezer-status-card">
-                <span class="banner-label">Refresh Mode</span>
-                <strong id="freezer-refresh-label">Auto</strong>
-              </article>
-              <article class="freezer-status-card">
                 <span class="banner-label">Programs Linked</span>
                 <strong>{{ freezer_overview.study_codes | join(", ") }}</strong>
               </article>
@@ -159,7 +138,10 @@
       <section class="freezer-panel freezer-panel-wide">
         <div class="freezer-panel-head">
           <h2>Sensor Wall</h2>
-          <span id="freezer-wall-count">0 units</span>
+          <div class="freezer-panel-head-actions">
+            <span id="freezer-wall-count">0 units</span>
+            <button class="button secondary freezer-pane-toggle" id="freezer-pane-toggle" type="button" aria-controls="freezer-side-pane" aria-expanded="false">Open Filter Pane</button>
+          </div>
         </div>
         <div class="freezer-sensor-wall" id="freezer-sensor-wall"></div>
       </section>
