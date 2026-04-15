@@ -582,7 +582,15 @@ def current_runtime_status() -> dict[str, Any]:
 
 
 def render_page(request: Request, template_name: str, context: dict[str, Any], status_code: int = 200) -> HTMLResponse:
-    return templates.TemplateResponse(request, template_name, {"app_title": settings.app_title, "public_demo_mode": True, "current_user": demo_user(), "user_access_scope": access_scope(), "runtime_status_json": json.dumps(jsonable_encoder(current_runtime_status())), "field_catalog_json": json.dumps(FIELD_CATALOG), "header_mapping_options_json": json.dumps(HEADER_MAPPING_OPTIONS), **context}, status_code=status_code)
+    base_url = str(request.base_url).rstrip("/") or settings.app_base_url.rstrip("/")
+    social_defaults = {
+        "social_title": f"{settings.app_title}: AI Workspace for Research Operations",
+        "social_description": "Public-safe biospecimen operations workspace for patient onboarding, workbook intake, freezer monitoring, and AI-assisted reporting that helps researchers spend less time on manual operations and more time on science.",
+        "social_image_url": f"{base_url}/static/preview-card.png",
+        "social_image_alt": f"{settings.app_title} social preview card",
+        "canonical_url": str(request.url),
+    }
+    return templates.TemplateResponse(request, template_name, {"app_title": settings.app_title, "public_demo_mode": True, "current_user": demo_user(), "user_access_scope": access_scope(), "runtime_status_json": json.dumps(jsonable_encoder(current_runtime_status())), "field_catalog_json": json.dumps(FIELD_CATALOG), "header_mapping_options_json": json.dumps(HEADER_MAPPING_OPTIONS), **social_defaults, **context}, status_code=status_code)
 
 
 def review_rows(file_names: list[str], mode: str) -> list[dict[str, Any]]:
