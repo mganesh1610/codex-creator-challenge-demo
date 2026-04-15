@@ -51,6 +51,23 @@ FIELD_CATALOG = [
     {"key": "disposition_code", "label": "Disposition", "category": "Inventory"},
     {"key": "obtained_date", "label": "Collection Date", "category": "Registry"},
     {"key": "patient_visit_label", "label": "Visit Label", "category": "Registry"},
+    {"key": "age_band", "label": "Age Band", "category": "Demographic"},
+    {"key": "sex_at_birth", "label": "Sex At Birth", "category": "Demographic"},
+    {"key": "gender_identity", "label": "Gender Identity", "category": "Demographic"},
+    {"key": "race_category", "label": "Race Category", "category": "Demographic"},
+    {"key": "ethnicity", "label": "Ethnicity", "category": "Demographic"},
+    {"key": "preferred_language", "label": "Preferred Language", "category": "Demographic"},
+    {"key": "tobacco_use", "label": "Tobacco Use", "category": "Behavior"},
+    {"key": "alcohol_pattern", "label": "Alcohol Pattern", "category": "Behavior"},
+    {"key": "activity_level", "label": "Activity Level", "category": "Behavior"},
+    {"key": "sleep_pattern", "label": "Sleep Pattern", "category": "Behavior"},
+    {"key": "diet_pattern", "label": "Diet Pattern", "category": "Behavior"},
+    {"key": "disease_area", "label": "Disease Area", "category": "Condition"},
+    {"key": "primary_condition", "label": "Primary Condition", "category": "Condition"},
+    {"key": "condition_status", "label": "Condition Status", "category": "Condition"},
+    {"key": "treatment_status", "label": "Treatment Status", "category": "Condition"},
+    {"key": "comorbidity_burden", "label": "Comorbidity Burden", "category": "Condition"},
+    {"key": "symptom_burden", "label": "Symptom Burden", "category": "Condition"},
 ]
 HEADER_MAPPING_OPTIONS = [item["key"] for item in FIELD_CATALOG]
 MAPPING_RULES = [
@@ -85,7 +102,37 @@ REF = {
         {"site_id": 5, "site_name": "Mobile Collection Unit", "site_abbreviation": "MCU"},
         {"site_id": 6, "site_name": "Central Processing", "site_abbreviation": "CP"},
     ],
+    "age_bands": ["18-29", "30-39", "40-49", "50-64", "65+"],
+    "sex_at_birth_options": ["Female", "Male", "Intersex", "Prefer not to say"],
+    "gender_identity_options": ["Woman", "Man", "Non-binary", "Another identity", "Prefer not to say"],
+    "race_options": [
+        "White",
+        "Black or African American",
+        "Asian",
+        "American Indian or Alaska Native",
+        "Native Hawaiian or Pacific Islander",
+        "Multiracial",
+        "Prefer not to say",
+    ],
+    "ethnicity_options": ["Hispanic or Latino", "Not Hispanic or Latino", "Prefer not to say"],
+    "language_options": ["English", "Spanish", "Mandarin", "Vietnamese", "Navajo", "Other"],
+    "tobacco_use_options": ["Never", "Former", "Current"],
+    "alcohol_pattern_options": ["None", "Occasional", "Weekly", "High-risk"],
+    "activity_level_options": ["Low", "Moderate", "High"],
+    "sleep_pattern_options": ["Stable", "Irregular", "Disturbed"],
+    "diet_pattern_options": ["General", "Heart-healthy", "Plant-forward", "High-protein", "Restricted"],
+    "disease_area_options": ["Respiratory", "Immune", "Recovery", "Cardiometabolic", "Oncology", "Neurologic"],
+    "condition_status_options": ["Controlled", "Active", "Monitoring", "Recovery"],
+    "treatment_status_options": ["No active therapy", "Maintenance therapy", "Escalation planned", "Supportive care", "Post-treatment follow-up"],
+    "comorbidity_burden_options": ["None", "One comorbidity", "Multiple comorbidities"],
+    "symptom_burden_options": ["Low", "Moderate", "High"],
 }
+PRIMARY_CONDITION_BY_STUDY = {
+    1: ["Asthma follow-up", "Chronic cough review", "COPD monitoring", "Post-viral dyspnea"],
+    2: ["Autoimmune flare", "Immune dysregulation", "Immunotherapy response", "Vaccine response review"],
+    3: ["Longitudinal recovery", "Post-acute fatigue", "Recovery monitoring", "Post-treatment surveillance"],
+}
+DISEASE_AREA_BY_STUDY = {1: "Respiratory", 2: "Immune", 3: "Recovery"}
 STUDY_SEED_CONFIG = [
     {"study_id": 1, "study_code": "RESP", "sub_prefix": "RSP", "patient_count": 24, "visit_pattern": (2, 2, 3), "site_cycle": (1, 2, 6, 4), "base_date": date(2026, 1, 6)},
     {"study_id": 2, "study_code": "IMM", "sub_prefix": "IMM", "patient_count": 24, "visit_pattern": (2, 3, 3), "site_cycle": (3, 4, 6, 1), "base_date": date(2026, 1, 10)},
@@ -125,6 +172,42 @@ def _seed_phase_id(visit_number: int) -> int:
     return 3
 
 
+def _cycle_pick(options: list[str], index: int) -> str:
+    return options[index % len(options)]
+
+
+def _seed_visit_profile(study_id: int, patient_index: int, visit_number: int) -> dict[str, Any]:
+    sex_at_birth = _cycle_pick(REF["sex_at_birth_options"], patient_index + study_id)
+    if sex_at_birth == "Female":
+        gender_identity = "Woman"
+    elif sex_at_birth == "Male":
+        gender_identity = "Man"
+    elif (patient_index + study_id) % 2 == 0:
+        gender_identity = "Non-binary"
+    else:
+        gender_identity = "Prefer not to say"
+
+    return {
+        "age_band": _cycle_pick(REF["age_bands"], patient_index + study_id),
+        "sex_at_birth": sex_at_birth,
+        "gender_identity": gender_identity,
+        "race_category": _cycle_pick(REF["race_options"], patient_index + visit_number),
+        "ethnicity": _cycle_pick(REF["ethnicity_options"], patient_index + study_id + visit_number),
+        "preferred_language": _cycle_pick(REF["language_options"], patient_index + (study_id * 2)),
+        "tobacco_use": _cycle_pick(REF["tobacco_use_options"], patient_index + visit_number),
+        "alcohol_pattern": _cycle_pick(REF["alcohol_pattern_options"], patient_index + study_id + visit_number),
+        "activity_level": _cycle_pick(REF["activity_level_options"], patient_index + study_id),
+        "sleep_pattern": _cycle_pick(REF["sleep_pattern_options"], patient_index + visit_number + study_id),
+        "diet_pattern": _cycle_pick(REF["diet_pattern_options"], patient_index + (visit_number * 2)),
+        "disease_area": DISEASE_AREA_BY_STUDY.get(study_id, "General"),
+        "primary_condition": _cycle_pick(PRIMARY_CONDITION_BY_STUDY.get(study_id, ["General monitoring"]), patient_index - 1),
+        "condition_status": _cycle_pick(REF["condition_status_options"], patient_index + visit_number + study_id),
+        "treatment_status": _cycle_pick(REF["treatment_status_options"], patient_index + (visit_number * 2)),
+        "comorbidity_burden": _cycle_pick(REF["comorbidity_burden_options"], patient_index + study_id),
+        "symptom_burden": _cycle_pick(REF["symptom_burden_options"], patient_index + visit_number),
+    }
+
+
 def _build_seed_dataset() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     visits: list[dict[str, Any]] = []
     samples: list[dict[str, Any]] = []
@@ -152,6 +235,7 @@ def _build_seed_dataset() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
                     "patient_visit_label": f"{config['study_code']}-{patient_index:03d}-{label_suffix}",
                     "sub_study_id": f"{config['sub_prefix']}-{patient_index:03d}",
                     "csid": f"CS-{1000 + next_visit_id}",
+                    **_seed_visit_profile(config["study_id"], patient_index, visit_number),
                 }
                 visits.append(visit)
 
@@ -282,7 +366,38 @@ def demo_rows() -> list[dict[str, Any]]:
         study = lookup(REF["studies"], "study_id", visit["study_id"]) or {}
         phase = lookup(REF["phases"], "visit_phase_id", visit["visit_phase_id"]) or {}
         site = lookup(REF["sites"], "site_id", visit["obtained_from_id"]) or {}
-        rows.append({"patient_id": visit["patient_id"], "visit_number": visit["visit_number"], "study_code": study.get("study_code", ""), "phase_code": phase.get("phase_code", ""), "site_name": site.get("site_name", ""), "sample_barcode": sample["sample_barcode"], "sample_type": sample["sample_type"], "component_code": sample["component_code"], "disposition_code": sample["disposition_code"], "obtained_date": visit["obtained_date"], "patient_visit_label": visit["patient_visit_label"]})
+        rows.append(
+            {
+                "patient_id": visit["patient_id"],
+                "visit_number": visit["visit_number"],
+                "study_code": study.get("study_code", ""),
+                "phase_code": phase.get("phase_code", ""),
+                "site_name": site.get("site_name", ""),
+                "age_band": visit.get("age_band", ""),
+                "sex_at_birth": visit.get("sex_at_birth", ""),
+                "gender_identity": visit.get("gender_identity", ""),
+                "race_category": visit.get("race_category", ""),
+                "ethnicity": visit.get("ethnicity", ""),
+                "preferred_language": visit.get("preferred_language", ""),
+                "tobacco_use": visit.get("tobacco_use", ""),
+                "alcohol_pattern": visit.get("alcohol_pattern", ""),
+                "activity_level": visit.get("activity_level", ""),
+                "sleep_pattern": visit.get("sleep_pattern", ""),
+                "diet_pattern": visit.get("diet_pattern", ""),
+                "disease_area": visit.get("disease_area", ""),
+                "primary_condition": visit.get("primary_condition", ""),
+                "condition_status": visit.get("condition_status", ""),
+                "treatment_status": visit.get("treatment_status", ""),
+                "comorbidity_burden": visit.get("comorbidity_burden", ""),
+                "symptom_burden": visit.get("symptom_burden", ""),
+                "sample_barcode": sample["sample_barcode"],
+                "sample_type": sample["sample_type"],
+                "component_code": sample["component_code"],
+                "disposition_code": sample["disposition_code"],
+                "obtained_date": visit["obtained_date"],
+                "patient_visit_label": visit["patient_visit_label"],
+            }
+        )
     return rows
 
 
@@ -292,9 +407,72 @@ def recent_patient_visits(limit: int = 12) -> list[dict[str, Any]]:
         study = lookup(REF["studies"], "study_id", visit["study_id"]) or {}
         phase = lookup(REF["phases"], "visit_phase_id", visit["visit_phase_id"]) or {}
         site = lookup(REF["sites"], "site_id", visit["obtained_from_id"]) or {}
-        rows.append({"visit_id": visit["visit_id"], "patient_id": visit["patient_id"], "visit_number": visit["visit_number"], "phase_code": phase.get("phase_code"), "obtained_date": visit["obtained_date"], "study_code": study.get("study_code"), "site_name": site.get("site_name"), "patient_visit_label": visit["patient_visit_label"], "sub_study_id": visit.get("sub_study_id"), "csid": visit.get("csid")})
+        rows.append(
+            {
+                "visit_id": visit["visit_id"],
+                "patient_id": visit["patient_id"],
+                "visit_number": visit["visit_number"],
+                "phase_code": phase.get("phase_code"),
+                "obtained_date": visit["obtained_date"],
+                "study_code": study.get("study_code"),
+                "site_name": site.get("site_name"),
+                "patient_visit_label": visit["patient_visit_label"],
+                "sub_study_id": visit.get("sub_study_id"),
+                "csid": visit.get("csid"),
+                "age_band": visit.get("age_band"),
+                "sex_at_birth": visit.get("sex_at_birth"),
+                "gender_identity": visit.get("gender_identity"),
+                "race_category": visit.get("race_category"),
+                "ethnicity": visit.get("ethnicity"),
+                "preferred_language": visit.get("preferred_language"),
+                "tobacco_use": visit.get("tobacco_use"),
+                "alcohol_pattern": visit.get("alcohol_pattern"),
+                "activity_level": visit.get("activity_level"),
+                "sleep_pattern": visit.get("sleep_pattern"),
+                "diet_pattern": visit.get("diet_pattern"),
+                "disease_area": visit.get("disease_area"),
+                "primary_condition": visit.get("primary_condition"),
+                "condition_status": visit.get("condition_status"),
+                "treatment_status": visit.get("treatment_status"),
+                "comorbidity_burden": visit.get("comorbidity_burden"),
+                "symptom_burden": visit.get("symptom_burden"),
+            }
+        )
     rows.sort(key=lambda row: row["obtained_date"], reverse=True)
     return rows[:limit]
+
+
+def patient_onboarding_overview() -> dict[str, Any]:
+    participant_total = len({visit["patient_id"] for visit in VISITS})
+    baseline_total = sum(1 for visit in VISITS if visit.get("visit_number") == 1)
+    condition_total = len({visit.get("primary_condition") for visit in VISITS if visit.get("primary_condition")})
+    behavior_flag_total = sum(
+        1
+        for visit in VISITS
+        if visit.get("tobacco_use") == "Current"
+        or visit.get("alcohol_pattern") == "High-risk"
+        or visit.get("sleep_pattern") == "Disturbed"
+    )
+    language_mix = Counter(visit.get("preferred_language") for visit in VISITS if visit.get("preferred_language"))
+    condition_mix = Counter(visit.get("disease_area") for visit in VISITS if visit.get("disease_area"))
+    behavior_mix = Counter(
+        label
+        for visit in VISITS
+        for label in (visit.get("tobacco_use"), visit.get("activity_level"), visit.get("sleep_pattern"))
+        if label
+    )
+    return {
+        "metrics": [
+            {"label": "Participants", "value": f"{participant_total:,}", "detail": "Registry profiles represented in the public intake session."},
+            {"label": "Baseline Intakes", "value": f"{baseline_total:,}", "detail": "First-touch visits currently staged across active programs."},
+            {"label": "Condition Profiles", "value": f"{condition_total:,}", "detail": "Distinct disease conditions currently represented in the demo intake flow."},
+            {"label": "Behavior Flags", "value": f"{behavior_flag_total:,}", "detail": "Profiles with current tobacco use, high-risk alcohol patterns, or disturbed sleep."},
+        ],
+        "language_mix": [{"label": label, "count": count} for label, count in language_mix.most_common(4)],
+        "condition_mix": [{"label": label, "count": count} for label, count in condition_mix.most_common(4)],
+        "behavior_mix": [{"label": label, "count": count} for label, count in behavior_mix.most_common(4)],
+        "recent_profiles": recent_patient_visits(4),
+    }
 
 
 def database_overview() -> dict[str, Any]:
@@ -540,7 +718,23 @@ async def uploads_redirect(upload_mode: str) -> RedirectResponse:
 @app.get("/patient-onboarding", response_class=HTMLResponse)
 async def patient_onboarding_page(request: Request) -> HTMLResponse:
     mode = normalize_upload_mode(DEFAULT_UPLOAD_MODE)
-    return render_page(request, "patient_onboarding.html", {"upload_mode": mode, "upload_mode_label": UPLOAD_MODES[mode]["label"], "primary_nav": primary_nav("patient_onboarding", mode), "reference_data": REF, "recent_visits": recent_patient_visits(), "message": None, "message_tone": "warn", "form_data": {}, "created_visit": None, "app_page": "patient_onboarding"})
+    return render_page(
+        request,
+        "patient_onboarding.html",
+        {
+            "upload_mode": mode,
+            "upload_mode_label": UPLOAD_MODES[mode]["label"],
+            "primary_nav": primary_nav("patient_onboarding", mode),
+            "reference_data": REF,
+            "recent_visits": recent_patient_visits(),
+            "patient_overview": patient_onboarding_overview(),
+            "message": None,
+            "message_tone": "warn",
+            "form_data": {},
+            "created_visit": None,
+            "app_page": "patient_onboarding",
+        },
+    )
 
 
 @app.post("/patient-onboarding", response_class=HTMLResponse)
@@ -556,8 +750,53 @@ async def patient_onboarding_submit(
     patient_visit_label: str = Form(""),
     sub_study_id: str = Form(""),
     csid: str = Form(""),
+    age_band: str = Form(""),
+    sex_at_birth: str = Form(""),
+    gender_identity: str = Form(""),
+    race_category: str = Form(""),
+    ethnicity: str = Form(""),
+    preferred_language: str = Form(""),
+    tobacco_use: str = Form(""),
+    alcohol_pattern: str = Form(""),
+    activity_level: str = Form(""),
+    sleep_pattern: str = Form(""),
+    diet_pattern: str = Form(""),
+    disease_area: str = Form(""),
+    primary_condition: str = Form(""),
+    condition_status: str = Form(""),
+    treatment_status: str = Form(""),
+    comorbidity_burden: str = Form(""),
+    symptom_burden: str = Form(""),
 ) -> HTMLResponse:
-    form_data = {"patient_id": patient_id, "visit_number": visit_number, "study_id": study_id, "visit_phase_id": visit_phase_id, "obtained_from_id": obtained_from_id, "obtained_date": obtained_date, "study_year": study_year, "patient_visit_label": patient_visit_label, "sub_study_id": sub_study_id, "csid": csid}
+    form_data = {
+        "patient_id": patient_id,
+        "visit_number": visit_number,
+        "study_id": study_id,
+        "visit_phase_id": visit_phase_id,
+        "obtained_from_id": obtained_from_id,
+        "obtained_date": obtained_date,
+        "study_year": study_year,
+        "patient_visit_label": patient_visit_label,
+        "sub_study_id": sub_study_id,
+        "csid": csid,
+        "age_band": age_band,
+        "sex_at_birth": sex_at_birth,
+        "gender_identity": gender_identity,
+        "race_category": race_category,
+        "ethnicity": ethnicity,
+        "preferred_language": preferred_language,
+        "tobacco_use": tobacco_use,
+        "alcohol_pattern": alcohol_pattern,
+        "activity_level": activity_level,
+        "sleep_pattern": sleep_pattern,
+        "diet_pattern": diet_pattern,
+        "disease_area": disease_area,
+        "primary_condition": primary_condition,
+        "condition_status": condition_status,
+        "treatment_status": treatment_status,
+        "comorbidity_burden": comorbidity_burden,
+        "symptom_burden": symptom_burden,
+    }
     mode = normalize_upload_mode(DEFAULT_UPLOAD_MODE)
     try:
         pid = (patient_id or "").strip()
@@ -571,14 +810,71 @@ async def patient_onboarding_submit(
         if any(visit["patient_id"] == pid and visit["visit_number"] == visit_no for visit in VISITS):
             raise HTTPException(status_code=400, detail="That patient already has the selected visit number in the demo.")
         iso_date = date.fromisoformat(obtained_date).isoformat() if obtained_date else date.today().isoformat()
-        new_visit = {"visit_id": max(visit["visit_id"] for visit in VISITS) + 1, "patient_id": pid, "visit_number": visit_no, "study_id": study_no, "visit_phase_id": int(visit_phase_id) if visit_phase_id else None, "obtained_from_id": int(obtained_from_id) if obtained_from_id else None, "obtained_date": iso_date, "study_year": int(study_year) if study_year else date.today().year, "patient_visit_label": (patient_visit_label or f"{study['study_code']}-{pid}").strip(), "sub_study_id": (sub_study_id or "").strip() or None, "csid": (csid or "").strip() or None}
+        new_visit = {
+            "visit_id": max(visit["visit_id"] for visit in VISITS) + 1,
+            "patient_id": pid,
+            "visit_number": visit_no,
+            "study_id": study_no,
+            "visit_phase_id": int(visit_phase_id) if visit_phase_id else None,
+            "obtained_from_id": int(obtained_from_id) if obtained_from_id else None,
+            "obtained_date": iso_date,
+            "study_year": int(study_year) if study_year else date.today().year,
+            "patient_visit_label": (patient_visit_label or f"{study['study_code']}-{pid}").strip(),
+            "sub_study_id": (sub_study_id or "").strip() or None,
+            "csid": (csid or "").strip() or None,
+            "age_band": (age_band or "").strip() or None,
+            "sex_at_birth": (sex_at_birth or "").strip() or None,
+            "gender_identity": (gender_identity or "").strip() or None,
+            "race_category": (race_category or "").strip() or None,
+            "ethnicity": (ethnicity or "").strip() or None,
+            "preferred_language": (preferred_language or "").strip() or None,
+            "tobacco_use": (tobacco_use or "").strip() or None,
+            "alcohol_pattern": (alcohol_pattern or "").strip() or None,
+            "activity_level": (activity_level or "").strip() or None,
+            "sleep_pattern": (sleep_pattern or "").strip() or None,
+            "diet_pattern": (diet_pattern or "").strip() or None,
+            "disease_area": (disease_area or "").strip() or None,
+            "primary_condition": (primary_condition or "").strip() or None,
+            "condition_status": (condition_status or "").strip() or None,
+            "treatment_status": (treatment_status or "").strip() or None,
+            "comorbidity_burden": (comorbidity_burden or "").strip() or None,
+            "symptom_burden": (symptom_burden or "").strip() or None,
+        }
         VISITS.append(new_visit)
-        created = {"patient_id": new_visit["patient_id"], "visit_number": new_visit["visit_number"], "study_code": study["study_code"], "phase_code": (lookup(REF["phases"], "visit_phase_id", new_visit["visit_phase_id"]) or {}).get("phase_code"), "patient_visit_label": new_visit["patient_visit_label"]}
+        created = {
+            "patient_id": new_visit["patient_id"],
+            "visit_number": new_visit["visit_number"],
+            "study_code": study["study_code"],
+            "phase_code": (lookup(REF["phases"], "visit_phase_id", new_visit["visit_phase_id"]) or {}).get("phase_code"),
+            "patient_visit_label": new_visit["patient_visit_label"],
+            "age_band": new_visit.get("age_band"),
+            "preferred_language": new_visit.get("preferred_language"),
+            "primary_condition": new_visit.get("primary_condition"),
+            "condition_status": new_visit.get("condition_status"),
+            "tobacco_use": new_visit.get("tobacco_use"),
+        }
         message, tone, status = f"Patient {pid} visit {visit_no} was added to the public demo dataset.", "ready", 201
     except Exception as exc:
         detail = exc.detail if isinstance(exc, HTTPException) else str(exc)
         created, message, tone, status = None, detail, "warn", exc.status_code if isinstance(exc, HTTPException) else 400
-    return render_page(request, "patient_onboarding.html", {"upload_mode": mode, "upload_mode_label": UPLOAD_MODES[mode]["label"], "primary_nav": primary_nav("patient_onboarding", mode), "reference_data": REF, "recent_visits": recent_patient_visits(), "message": message, "message_tone": tone, "form_data": {} if created else form_data, "created_visit": created, "app_page": "patient_onboarding"}, status_code=status)
+    return render_page(
+        request,
+        "patient_onboarding.html",
+        {
+            "upload_mode": mode,
+            "upload_mode_label": UPLOAD_MODES[mode]["label"],
+            "primary_nav": primary_nav("patient_onboarding", mode),
+            "reference_data": REF,
+            "recent_visits": recent_patient_visits(),
+            "patient_overview": patient_onboarding_overview(),
+            "message": message,
+            "message_tone": tone,
+            "form_data": {} if created else form_data,
+            "created_visit": created,
+            "app_page": "patient_onboarding",
+        },
+        status_code=status,
+    )
 
 
 @app.get("/freezer-monitoring", response_class=HTMLResponse)

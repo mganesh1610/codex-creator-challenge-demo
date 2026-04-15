@@ -1991,6 +1991,8 @@ input[type="text"] {
 
   .dataloader-summary-card,
   .dataloader-mapping-card,
+  .patient-onboarding-form-card,
+  .patient-onboarding-side-card,
   .ai-question-card,
   .ai-guide-card,
   .ai-grounded-card,
@@ -1999,6 +2001,10 @@ input[type="text"] {
   }
 
   .query-prompt-rack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .patient-form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -2163,6 +2169,15 @@ input[type="text"] {
   .dataloader-summary-card .summary-grid,
   .query-prompt-rack {
     grid-template-columns: 1fr;
+  }
+
+  .patient-form-grid,
+  .patient-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field-wide {
+    grid-column: span 1;
   }
 
   .snapshot-metric-grid {
@@ -3205,8 +3220,166 @@ input[type="text"] {
   background: rgba(255, 255, 255, 0.84);
 }
 
+.form-field textarea {
+  width: 100%;
+  min-height: 116px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  padding: 12px 14px;
+  font: inherit;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.84);
+  resize: vertical;
+}
+
 .form-field-wide {
   grid-column: span 2;
+}
+
+.patient-onboarding-intro-card {
+  background:
+    linear-gradient(135deg, rgba(140, 29, 64, 0.12), rgba(255, 255, 255, 0) 35%),
+    linear-gradient(180deg, rgba(255, 251, 246, 0.96), rgba(255, 248, 242, 0.9));
+}
+
+.patient-onboarding-form-card {
+  grid-column: span 8;
+  background:
+    linear-gradient(180deg, rgba(140, 29, 64, 0.06), transparent 22%),
+    rgba(255, 251, 246, 0.94);
+}
+
+.patient-onboarding-side-card {
+  grid-column: span 4;
+  background:
+    linear-gradient(180deg, rgba(255, 198, 39, 0.12), transparent 22%),
+    rgba(255, 251, 246, 0.94);
+}
+
+.patient-created-card {
+  background:
+    linear-gradient(135deg, rgba(13, 95, 69, 0.08), rgba(255, 255, 255, 0.72));
+}
+
+.patient-intake-form {
+  gap: 20px;
+}
+
+.patient-form-section {
+  display: grid;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(140, 29, 64, 0.08);
+}
+
+.patient-form-section:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.patient-section-head {
+  display: grid;
+  gap: 6px;
+}
+
+.patient-section-head h3 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.patient-section-head p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.patient-form-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.patient-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.patient-overview-card {
+  padding: 14px 15px;
+  border-radius: 18px;
+  border: 1px solid rgba(140, 29, 64, 0.12);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.patient-overview-card strong {
+  display: block;
+  margin: 6px 0 8px;
+  font-size: clamp(1.3rem, 1.8vw, 1.8rem);
+  line-height: 1;
+}
+
+.patient-overview-card p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.patient-summary-stack {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.patient-summary-panel {
+  display: grid;
+  gap: 10px;
+  padding: 14px 15px;
+  border-radius: 18px;
+  border: 1px solid rgba(140, 29, 64, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.patient-summary-panel h3 {
+  margin: 0;
+  font-size: 0.96rem;
+}
+
+.patient-summary-list {
+  display: grid;
+  gap: 8px;
+}
+
+.patient-summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 14px;
+  background: rgba(248, 244, 238, 0.88);
+}
+
+.patient-summary-item span {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.patient-summary-item strong {
+  font-size: 0.95rem;
+}
+
+.patient-mini-table {
+  min-width: 980px;
+}
+
+.patient-mini-table th,
+.patient-mini-table td {
+  white-space: normal;
+}
+
+.patient-mini-table td {
+  min-width: 148px;
 }
 
 @media (max-width: 980px) {

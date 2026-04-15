@@ -1,18 +1,425 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>{{ app_title }} | Patient Onboarding</title><link rel="stylesheet" href="/static/styles.css" /></head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ app_title }} | Patient Onboarding</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
 <body>
   <div class="page-shell">
     {% set topbar_label = "Registry Workspace" %}
     {% set topbar_title = "Patient Onboarding" %}
-    {% set topbar_copy = "Create patient and visit records in the public demo registry before samples move into intake." %}
+    {% set topbar_copy = "Create patient, demographic, behavior, and condition records before samples move into intake." %}
     {% set topbar_session_label = "Public Demo Session" %}
     {% include "_workspace_topbar.html" %}
-    {% if message %}<section class="alert-banner {{ message_tone }}">{{ message }}</section>{% endif %}
-    {% if created_visit %}<section class="access-strip"><div class="access-card"><span class="banner-label">Created Visit</span><div class="chip-row"><span class="study-chip upload">Patient {{ created_visit.patient_id }}</span><span class="study-chip upload">Visit {{ created_visit.visit_number }}</span>{% if created_visit.study_code %}<span class="study-chip">{{ created_visit.study_code }}</span>{% endif %}{% if created_visit.phase_code %}<span class="study-chip">{{ created_visit.phase_code }}</span>{% endif %}{% if created_visit.patient_visit_label %}<span class="study-chip">{{ created_visit.patient_visit_label }}</span>{% endif %}</div></div></section>{% endif %}
-    <main class="dashboard">
-      <section class="card wide"><div class="card-head"><h2>Create Patient Visit</h2><p>Required: patient ID, program, and visit number. Optional visit metadata can be added now for the public demo.</p></div><form method="post" action="/patient-onboarding" class="data-entry-form"><div class="form-grid"><label class="form-field"><span>Patient ID</span><input type="text" name="patient_id" value="{{ form_data.get('patient_id', '') }}" required /></label><label class="form-field"><span>Visit Number</span><input type="number" name="visit_number" min="0" value="{{ form_data.get('visit_number', '1') }}" required /></label><label class="form-field"><span>Program</span><select name="study_id" required><option value="">Select a program</option>{% for study in reference_data.studies %}<option value="{{ study.study_id }}" {% if form_data.get('study_id', '')|string == study.study_id|string %}selected{% endif %}>{{ study.study_code }} | {{ study.study_name }}</option>{% endfor %}</select></label><label class="form-field"><span>Phase</span><select name="visit_phase_id"><option value="">Optional</option>{% for phase in reference_data.phases %}<option value="{{ phase.visit_phase_id }}" {% if form_data.get('visit_phase_id', '')|string == phase.visit_phase_id|string %}selected{% endif %}>{{ phase.phase_name }}</option>{% endfor %}</select></label><label class="form-field"><span>Collection Site</span><select name="obtained_from_id"><option value="">Optional</option>{% for site in reference_data.sites %}<option value="{{ site.site_id }}" {% if form_data.get('obtained_from_id', '')|string == site.site_id|string %}selected{% endif %}>{{ site.site_name }}{% if site.site_abbreviation %} ({{ site.site_abbreviation }}){% endif %}</option>{% endfor %}</select></label><label class="form-field"><span>Collection Date</span><input type="date" name="obtained_date" value="{{ form_data.get('obtained_date', '') }}" /></label><label class="form-field"><span>Study Year</span><input type="number" name="study_year" min="1900" max="2100" value="{{ form_data.get('study_year', '') }}" /></label><label class="form-field form-field-wide"><span>Visit Label</span><input type="text" name="patient_visit_label" value="{{ form_data.get('patient_visit_label', '') }}" placeholder="Example: RESP-DEMO-001" /></label><label class="form-field"><span>Sub-study ID</span><input type="text" name="sub_study_id" value="{{ form_data.get('sub_study_id', '') }}" /></label><label class="form-field"><span>CSID</span><input type="text" name="csid" value="{{ form_data.get('csid', '') }}" /></label></div><div class="actions"><button class="button primary" type="submit">Save Patient Visit</button><a class="button secondary" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a></div></form></section>
-      <section class="card wide"><div class="card-head"><h2>Recent Patient Visits</h2><p>Most recent patient visit rows visible in the current public demo session.</p></div><div class="table-wrap"><table class="mini-table"><thead><tr><th>Patient</th><th>Visit</th><th>Program</th><th>Phase</th><th>Collection Date</th><th>Site</th><th>Visit Label</th><th>Sub-study ID</th><th>CSID</th></tr></thead><tbody>{% for row in recent_visits %}<tr><td>{{ row.patient_id }}</td><td>{{ row.visit_number }}</td><td>{{ row.study_code or 'Unassigned' }}</td><td>{{ row.phase_code or 'n/a' }}</td><td>{{ row.obtained_date or 'n/a' }}</td><td>{{ row.site_name or 'n/a' }}</td><td>{{ row.patient_visit_label or 'n/a' }}</td><td>{{ row.sub_study_id or 'n/a' }}</td><td>{{ row.csid or 'n/a' }}</td></tr>{% endfor %}</tbody></table></div></section>
+
+    {% if message %}
+    <section class="alert-banner {{ message_tone }}">{{ message }}</section>
+    {% endif %}
+
+    {% if created_visit %}
+    <section class="access-strip">
+      <div class="access-card patient-created-card">
+        <span class="banner-label">Intake saved</span>
+        <div class="chip-row">
+          <span class="study-chip upload">Patient {{ created_visit.patient_id }}</span>
+          <span class="study-chip upload">Visit {{ created_visit.visit_number }}</span>
+          {% if created_visit.study_code %}<span class="study-chip">{{ created_visit.study_code }}</span>{% endif %}
+          {% if created_visit.phase_code %}<span class="study-chip">{{ created_visit.phase_code }}</span>{% endif %}
+          {% if created_visit.patient_visit_label %}<span class="study-chip">{{ created_visit.patient_visit_label }}</span>{% endif %}
+          {% if created_visit.age_band %}<span class="study-chip">{{ created_visit.age_band }}</span>{% endif %}
+          {% if created_visit.preferred_language %}<span class="study-chip">{{ created_visit.preferred_language }}</span>{% endif %}
+          {% if created_visit.primary_condition %}<span class="study-chip">{{ created_visit.primary_condition }}</span>{% endif %}
+          {% if created_visit.condition_status %}<span class="study-chip">{{ created_visit.condition_status }}</span>{% endif %}
+          {% if created_visit.tobacco_use %}<span class="study-chip">{{ created_visit.tobacco_use }} tobacco</span>{% endif %}
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    <main class="dashboard patient-onboarding-dashboard">
+      <section class="card wide patient-onboarding-intro-card">
+        <div class="page-intro-grid">
+          <div class="page-intro-copy">
+            <span class="page-eyebrow">Participant intake</span>
+            <h2>Registry, demographic, and clinical intake in one flow</h2>
+            <p>Capture the visit record, demographic profile, behavior details, and disease condition context in a single intake surface before downstream review begins.</p>
+            <div class="chip-row">
+              <span class="study-chip upload">Visit metadata</span>
+              <span class="study-chip">Demographic profile</span>
+              <span class="study-chip">Behavior details</span>
+              <span class="study-chip">Disease condition</span>
+            </div>
+          </div>
+          <div class="page-intro-aside">
+            <article class="page-intro-note">
+              <span>Collection scope</span>
+              <strong>Public-safe intake profile</strong>
+              <p>The form captures operationally useful profile fields without using any private site data, API calls, or protected records.</p>
+            </article>
+            <article class="page-intro-note">
+              <span>Workflow</span>
+              <strong>Record, review, route</strong>
+              <p>Each intake saves into the in-memory demo session so it is immediately visible to reporting, dataloader, and dashboard surfaces.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="card patient-onboarding-form-card">
+        <div class="card-head card-head-actions">
+          <div>
+            <h2>Create Patient Visit</h2>
+            <p>Required visit fields stay first, with demographic, behavior, and disease capture grouped below for a cleaner intake pass.</p>
+          </div>
+          <span class="section-mode-pill">Public demo intake</span>
+        </div>
+        <form method="post" action="/patient-onboarding" class="data-entry-form patient-intake-form">
+          <section class="patient-form-section">
+            <div class="patient-section-head">
+              <h3>Visit essentials</h3>
+              <p>Required patient, visit, and routing details for the registry record.</p>
+            </div>
+            <div class="form-grid patient-form-grid">
+              <label class="form-field">
+                <span>Patient ID</span>
+                <input type="text" name="patient_id" value="{{ form_data.get('patient_id', '') }}" required />
+              </label>
+              <label class="form-field">
+                <span>Visit Number</span>
+                <input type="number" name="visit_number" min="0" value="{{ form_data.get('visit_number', '1') }}" required />
+              </label>
+              <label class="form-field">
+                <span>Program</span>
+                <select name="study_id" required>
+                  <option value="">Select a program</option>
+                  {% for study in reference_data.studies %}
+                  <option value="{{ study.study_id }}" {% if form_data.get('study_id', '')|string == study.study_id|string %}selected{% endif %}>{{ study.study_code }} | {{ study.study_name }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Phase</span>
+                <select name="visit_phase_id">
+                  <option value="">Optional</option>
+                  {% for phase in reference_data.phases %}
+                  <option value="{{ phase.visit_phase_id }}" {% if form_data.get('visit_phase_id', '')|string == phase.visit_phase_id|string %}selected{% endif %}>{{ phase.phase_name }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Collection Site</span>
+                <select name="obtained_from_id">
+                  <option value="">Optional</option>
+                  {% for site in reference_data.sites %}
+                  <option value="{{ site.site_id }}" {% if form_data.get('obtained_from_id', '')|string == site.site_id|string %}selected{% endif %}>{{ site.site_name }}{% if site.site_abbreviation %} ({{ site.site_abbreviation }}){% endif %}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Collection Date</span>
+                <input type="date" name="obtained_date" value="{{ form_data.get('obtained_date', '') }}" />
+              </label>
+              <label class="form-field">
+                <span>Study Year</span>
+                <input type="number" name="study_year" min="1900" max="2100" value="{{ form_data.get('study_year', '') }}" />
+              </label>
+              <label class="form-field form-field-wide">
+                <span>Visit Label</span>
+                <input type="text" name="patient_visit_label" value="{{ form_data.get('patient_visit_label', '') }}" placeholder="Example: RESP-DEMO-001" />
+              </label>
+              <label class="form-field">
+                <span>Sub-study ID</span>
+                <input type="text" name="sub_study_id" value="{{ form_data.get('sub_study_id', '') }}" />
+              </label>
+              <label class="form-field">
+                <span>CSID</span>
+                <input type="text" name="csid" value="{{ form_data.get('csid', '') }}" />
+              </label>
+            </div>
+          </section>
+
+          <section class="patient-form-section">
+            <div class="patient-section-head">
+              <h3>Demographic profile</h3>
+              <p>Core participant profile fields typically captured at intake.</p>
+            </div>
+            <div class="form-grid patient-form-grid">
+              <label class="form-field">
+                <span>Age band</span>
+                <select name="age_band">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.age_bands %}
+                  <option value="{{ option }}" {% if form_data.get('age_band', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Sex at birth</span>
+                <select name="sex_at_birth">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.sex_at_birth_options %}
+                  <option value="{{ option }}" {% if form_data.get('sex_at_birth', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Gender identity</span>
+                <select name="gender_identity">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.gender_identity_options %}
+                  <option value="{{ option }}" {% if form_data.get('gender_identity', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Race category</span>
+                <select name="race_category">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.race_options %}
+                  <option value="{{ option }}" {% if form_data.get('race_category', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Ethnicity</span>
+                <select name="ethnicity">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.ethnicity_options %}
+                  <option value="{{ option }}" {% if form_data.get('ethnicity', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Preferred language</span>
+                <select name="preferred_language">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.language_options %}
+                  <option value="{{ option }}" {% if form_data.get('preferred_language', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="patient-form-section">
+            <div class="patient-section-head">
+              <h3>Behavior details</h3>
+              <p>High-level self-reported behavior indicators often used for cohort stratification.</p>
+            </div>
+            <div class="form-grid patient-form-grid">
+              <label class="form-field">
+                <span>Tobacco use</span>
+                <select name="tobacco_use">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.tobacco_use_options %}
+                  <option value="{{ option }}" {% if form_data.get('tobacco_use', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Alcohol pattern</span>
+                <select name="alcohol_pattern">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.alcohol_pattern_options %}
+                  <option value="{{ option }}" {% if form_data.get('alcohol_pattern', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Activity level</span>
+                <select name="activity_level">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.activity_level_options %}
+                  <option value="{{ option }}" {% if form_data.get('activity_level', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Sleep pattern</span>
+                <select name="sleep_pattern">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.sleep_pattern_options %}
+                  <option value="{{ option }}" {% if form_data.get('sleep_pattern', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Diet pattern</span>
+                <select name="diet_pattern">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.diet_pattern_options %}
+                  <option value="{{ option }}" {% if form_data.get('diet_pattern', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="patient-form-section">
+            <div class="patient-section-head">
+              <h3>Disease condition</h3>
+              <p>Condition context used for intake review, cohort assignment, and reporting.</p>
+            </div>
+            <div class="form-grid patient-form-grid">
+              <label class="form-field">
+                <span>Disease area</span>
+                <select name="disease_area">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.disease_area_options %}
+                  <option value="{{ option }}" {% if form_data.get('disease_area', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field form-field-wide">
+                <span>Primary condition</span>
+                <input type="text" name="primary_condition" value="{{ form_data.get('primary_condition', '') }}" placeholder="Example: Asthma follow-up or post-acute fatigue" />
+              </label>
+              <label class="form-field">
+                <span>Condition status</span>
+                <select name="condition_status">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.condition_status_options %}
+                  <option value="{{ option }}" {% if form_data.get('condition_status', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Treatment status</span>
+                <select name="treatment_status">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.treatment_status_options %}
+                  <option value="{{ option }}" {% if form_data.get('treatment_status', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Comorbidity burden</span>
+                <select name="comorbidity_burden">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.comorbidity_burden_options %}
+                  <option value="{{ option }}" {% if form_data.get('comorbidity_burden', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label class="form-field">
+                <span>Symptom burden</span>
+                <select name="symptom_burden">
+                  <option value="">Optional</option>
+                  {% for option in reference_data.symptom_burden_options %}
+                  <option value="{{ option }}" {% if form_data.get('symptom_burden', '') == option %}selected{% endif %}>{{ option }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <div class="actions">
+            <button class="button primary" type="submit">Save Patient Visit</button>
+            <a class="button secondary" href="/dataloader?mode={{ upload_mode }}">Open Dataloader</a>
+          </div>
+        </form>
+      </section>
+
+      <section class="card patient-onboarding-side-card">
+        <div class="card-head">
+          <h2>Patient Intake Snapshot</h2>
+          <p>Quick read on the intake mix currently visible in the public demo session.</p>
+        </div>
+        <div class="patient-overview-grid">
+          {% for metric in patient_overview.metrics %}
+          <article class="patient-overview-card">
+            <span class="banner-label">{{ metric.label }}</span>
+            <strong>{{ metric.value }}</strong>
+            <p>{{ metric.detail }}</p>
+          </article>
+          {% endfor %}
+        </div>
+        <div class="patient-summary-stack">
+          <section class="patient-summary-panel">
+            <h3>Top languages</h3>
+            <div class="chip-row">
+              {% for row in patient_overview.language_mix %}
+              <span class="study-chip">{{ row.label }} · {{ row.count }}</span>
+              {% endfor %}
+            </div>
+          </section>
+          <section class="patient-summary-panel">
+            <h3>Condition mix</h3>
+            <div class="patient-summary-list">
+              {% for row in patient_overview.condition_mix %}
+              <div class="patient-summary-item"><span>{{ row.label }}</span><strong>{{ row.count }}</strong></div>
+              {% endfor %}
+            </div>
+          </section>
+          <section class="patient-summary-panel">
+            <h3>Behavior signals</h3>
+            <div class="patient-summary-list">
+              {% for row in patient_overview.behavior_mix %}
+              <div class="patient-summary-item"><span>{{ row.label }}</span><strong>{{ row.count }}</strong></div>
+              {% endfor %}
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="card wide patient-onboarding-recent-card">
+        <div class="card-head">
+          <h2>Recent Intakes</h2>
+          <p>Newest patient records with demographic, behavior, and condition context captured in the current demo session.</p>
+        </div>
+        <div class="table-wrap">
+          <table class="mini-table patient-mini-table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Visit</th>
+                <th>Demographic Profile</th>
+                <th>Behavior Details</th>
+                <th>Disease Condition</th>
+                <th>Collection</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in recent_visits %}
+              <tr>
+                <td>
+                  <strong>{{ row.patient_id }}</strong>
+                  <span class="table-note">{{ row.study_code or 'Unassigned' }}{% if row.sub_study_id %} | {{ row.sub_study_id }}{% endif %}</span>
+                </td>
+                <td>
+                  <strong>Visit {{ row.visit_number }}</strong>
+                  <span class="table-note">{{ row.phase_code or 'n/a' }}{% if row.patient_visit_label %} | {{ row.patient_visit_label }}{% endif %}</span>
+                </td>
+                <td>
+                  <strong>{{ row.age_band or 'Not captured' }}</strong>
+                  <span class="table-note">{{ row.sex_at_birth or 'n/a' }} | {{ row.gender_identity or 'n/a' }}</span>
+                  <span class="table-note">{{ row.race_category or 'n/a' }} | {{ row.ethnicity or 'n/a' }}</span>
+                  <span class="table-note">Language: {{ row.preferred_language or 'n/a' }}</span>
+                </td>
+                <td>
+                  <strong>{{ row.tobacco_use or 'n/a' }} tobacco</strong>
+                  <span class="table-note">{{ row.alcohol_pattern or 'n/a' }} alcohol | {{ row.activity_level or 'n/a' }} activity</span>
+                  <span class="table-note">{{ row.sleep_pattern or 'n/a' }} sleep | {{ row.diet_pattern or 'n/a' }} diet</span>
+                </td>
+                <td>
+                  <strong>{{ row.primary_condition or 'Not captured' }}</strong>
+                  <span class="table-note">{{ row.disease_area or 'n/a' }} | {{ row.condition_status or 'n/a' }}</span>
+                  <span class="table-note">{{ row.treatment_status or 'n/a' }} | {{ row.comorbidity_burden or 'n/a' }}</span>
+                  <span class="table-note">Symptom burden: {{ row.symptom_burden or 'n/a' }}</span>
+                </td>
+                <td>
+                  <strong>{{ row.obtained_date or 'n/a' }}</strong>
+                  <span class="table-note">{{ row.site_name or 'n/a' }}</span>
+                  <span class="table-note">CSID: {{ row.csid or 'n/a' }}</span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
   </div>
   <script>
