@@ -24,6 +24,7 @@ body {
     radial-gradient(circle at bottom right, rgba(255, 198, 39, 0.22), transparent 28%),
     linear-gradient(180deg, var(--bg), var(--bg-deep));
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 body::before {
@@ -1978,27 +1979,110 @@ input[type="text"] {
   display: none !important;
 }
 
-@media (max-width: 1100px) {
-  .workspace-bar-main {
-    grid-template-columns: 1fr;
-    justify-items: stretch;
-    gap: 10px;
+@media (max-width: 1280px) {
+  .workspace-bar {
+    padding-inline: 12px;
   }
 
-  .workspace-brand,
+  .workspace-bar-main {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 12px;
+  }
+
   .workspace-nav {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-self: stretch;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .workspace-nav-item,
+  .workspace-nav-dropdown,
+  .workspace-nav-link {
+    flex: 0 0 auto;
+  }
+
+  .workspace-user-block {
+    justify-self: end;
+  }
+
+  .workspace-subnav-row {
+    justify-content: flex-start;
+  }
+
+  .workspace-subnav {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .dashboard {
+    gap: 16px;
+  }
+
+  .page-intro-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-intro-aside {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dataloader-dashboard .top-card {
+    height: min(68vh, 700px);
+    max-height: min(68vh, 700px);
+  }
+
+  .cold-storage-home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .study-breakdown-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .workspace-bar-main {
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-items: stretch;
+    gap: 10px 12px;
+  }
+
+  .workspace-brand {
     justify-self: start;
   }
 
   .workspace-nav {
+    grid-column: 1 / -1;
     width: 100%;
-    justify-content: center;
+    justify-self: stretch;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .workspace-user-block,
   .workspace-subnav-row {
     justify-content: flex-start;
-    justify-self: start;
+    justify-self: stretch;
+    flex-wrap: wrap;
+  }
+
+  .workspace-user-block {
+    justify-self: end;
+    justify-content: flex-end;
+  }
+
+  .workspace-nav-item,
+  .workspace-nav-dropdown,
+  .workspace-nav-link {
+    flex: 0 0 auto;
+  }
+
+  .workspace-subnav {
+    width: 100%;
+    justify-content: flex-start;
     flex-wrap: wrap;
   }
 
@@ -2007,8 +2091,6 @@ input[type="text"] {
     grid-template-columns: 1fr;
   }
 
-  .dataloader-summary-card,
-  .dataloader-mapping-card,
   .patient-onboarding-form-card,
   .patient-onboarding-side-card,
   .ai-question-card,
@@ -2016,6 +2098,10 @@ input[type="text"] {
   .ai-grounded-card,
   .ai-plan-card {
     grid-column: span 12;
+  }
+
+  .page-intro-aside {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .query-prompt-rack {
@@ -2048,10 +2134,13 @@ input[type="text"] {
     grid-template-columns: 1fr;
   }
 
-  .card,
   .upload-card,
   .card.wide {
     grid-column: span 12;
+  }
+
+  .card {
+    grid-column: span 6;
   }
 
   .top-card {
@@ -2106,6 +2195,7 @@ input[type="text"] {
   }
 
   .workspace-nav {
+    grid-column: 1 / -1;
     width: 100%;
     padding: 0;
     border: 0;
@@ -2129,6 +2219,7 @@ input[type="text"] {
   .workspace-user-block {
     width: 100%;
     justify-content: space-between;
+    justify-self: stretch;
   }
 
   .workspace-nav-link,
@@ -2208,6 +2299,10 @@ input[type="text"] {
 
   .snapshot-metric-card p {
     max-width: none;
+  }
+
+  .page-intro-aside {
+    grid-template-columns: 1fr;
   }
 
   .security-grid {
@@ -3404,6 +3499,11 @@ input[type="text"] {
   .cold-storage-home-grid,
   .home-split,
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-intro-aside,
+  .patient-overview-grid {
     grid-template-columns: 1fr;
   }
 
