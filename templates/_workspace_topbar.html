@@ -38,6 +38,50 @@
       {% endif %}
       {% endfor %}
     </nav>
+    <details class="workspace-mobile-menu">
+      <summary class="workspace-mobile-toggle" aria-label="Open navigation menu">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M4 6H16M4 10H16M4 14H12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        <span>Menu</span>
+      </summary>
+      <div class="workspace-mobile-panel">
+        <div class="workspace-mobile-session">
+          <span class="workspace-session-chip">{{ topbar_session_label }}</span>
+        </div>
+        <nav class="workspace-mobile-nav" aria-label="Mobile workspace navigation">
+          {% for item in primary_nav %}
+          {% if item.children %}
+          <details class="workspace-nav-item workspace-nav-dropdown {{ 'active' if item.active else '' }}">
+            <summary class="workspace-nav-link workspace-nav-summary {{ 'active' if item.active else '' }}">
+              <span>{{ item.label }}</span>
+              <svg class="workspace-nav-chevron" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </summary>
+            <div class="workspace-nav-menu" role="menu" aria-label="{{ item.label }} menu">
+              {% for child in item.children %}
+              <a class="workspace-nav-sublink {{ 'active' if child.active else '' }}" href="{{ child.href }}" role="menuitem">{{ child.label }}</a>
+              {% endfor %}
+            </div>
+          </details>
+          {% else %}
+          <a class="workspace-nav-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>
+          {% endif %}
+          {% endfor %}
+        </nav>
+        {% if topbar_subnav is defined and topbar_subnav %}
+        <div class="workspace-mobile-subnav">
+          <span class="workspace-subnav-label">{{ topbar_subnav_label or "Modes" }}</span>
+          <div class="workspace-subnav">
+            {% for item in topbar_subnav %}
+            <a class="workspace-subnav-link {{ 'active' if item.active else '' }}" href="{{ item.href }}">{{ item.label }}</a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </details>
     <div class="workspace-user-block">
       <span class="workspace-session-chip">{{ topbar_session_label }}</span>
       <div class="workspace-profile" title="{{ profile_name }} | {{ current_user.email }}" aria-label="{{ profile_name }} | {{ current_user.email }}">

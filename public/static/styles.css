@@ -138,6 +138,42 @@ body::before {
   min-width: 0;
 }
 
+.workspace-mobile-menu {
+  display: none;
+  position: relative;
+  justify-self: end;
+}
+
+.workspace-mobile-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(140, 29, 64, 0.14);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--accent-dark);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+  box-shadow: 0 8px 18px rgba(58, 21, 31, 0.08);
+}
+
+.workspace-mobile-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.workspace-mobile-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+.workspace-mobile-panel {
+  display: none;
+}
+
 .workspace-session-chip {
   display: inline-flex;
   align-items: center;
@@ -2194,15 +2230,12 @@ input[type="text"] {
     font-size: 0.98rem;
   }
 
+  .workspace-mobile-menu {
+    display: block;
+  }
+
   .workspace-nav {
-    grid-column: 1 / -1;
-    width: 100%;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    justify-content: flex-start;
+    display: none;
   }
 
   .workspace-profile {
@@ -2217,27 +2250,62 @@ input[type="text"] {
   }
 
   .workspace-user-block {
+    width: auto;
+    justify-content: flex-end;
+    justify-self: end;
+  }
+
+  .workspace-user-block .workspace-session-chip,
+  .workspace-subnav-row {
+    display: none;
+  }
+
+  .workspace-mobile-menu[open] .workspace-mobile-panel {
+    display: grid;
+  }
+
+  .workspace-mobile-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: min(320px, calc(100vw - 24px));
+    padding: 14px;
+    gap: 12px;
+    border-radius: 22px;
+    border: 1px solid rgba(140, 29, 64, 0.12);
+    background: linear-gradient(180deg, rgba(255, 252, 248, 0.98), rgba(255, 247, 240, 0.96));
+    box-shadow: 0 20px 38px rgba(58, 21, 31, 0.16);
+  }
+
+  .workspace-mobile-session {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .workspace-mobile-nav {
+    display: grid;
+    gap: 8px;
+  }
+
+  .workspace-mobile-nav .workspace-nav-item,
+  .workspace-mobile-nav .workspace-nav-dropdown,
+  .workspace-mobile-nav .workspace-nav-link,
+  .workspace-mobile-nav .workspace-nav-summary,
+  .workspace-mobile-nav .workspace-nav-sublink,
+  .workspace-mobile-subnav .workspace-subnav-link {
     width: 100%;
-    justify-content: space-between;
-    justify-self: stretch;
   }
 
-  .workspace-nav-link,
-  .workspace-subnav-link {
-    flex: 1 1 calc(50% - 8px);
-    min-width: 124px;
+  .workspace-mobile-nav .workspace-nav-link,
+  .workspace-mobile-nav .workspace-nav-summary,
+  .workspace-mobile-subnav .workspace-subnav-link {
+    min-height: 42px;
+    justify-content: flex-start;
+    padding-inline: 14px;
   }
 
-  .workspace-nav-item,
-  .workspace-nav-dropdown {
-    width: 100%;
-  }
-
-  .workspace-nav-summary {
-    width: 100%;
-  }
-
-  .workspace-nav-menu {
+  .workspace-mobile-nav .workspace-nav-menu {
     position: static;
     left: auto;
     min-width: 0;
@@ -2250,12 +2318,13 @@ input[type="text"] {
     display: none;
   }
 
-  .workspace-nav-dropdown[open] .workspace-nav-menu {
+  .workspace-mobile-nav .workspace-nav-dropdown[open] .workspace-nav-menu {
     display: grid;
   }
 
-  .workspace-session-chip {
-    justify-content: center;
+  .workspace-mobile-subnav {
+    display: grid;
+    gap: 8px;
   }
 
   .card-head-actions {
@@ -2273,6 +2342,10 @@ input[type="text"] {
 
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .card {
+    grid-column: span 12;
   }
 
   .dataloader-summary-card .summary-grid,

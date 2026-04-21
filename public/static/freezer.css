@@ -986,20 +986,6 @@ body.freezer-pane-open {
     min-width: 72px;
     padding: 8px 10px;
   }
-}
-
-@media (min-width: 1400px) {
-  .freezer-grid {
-    grid-template-columns: 0.95fr 1.55fr 1fr;
-  }
-
-  .freezer-panel {
-    padding: 16px;
-  }
-
-  .freezer-summary-strip {
-    grid-template-columns: repeat(6, minmax(128px, 1fr));
-  }
 
   .freezer-panel-head-actions {
     align-items: stretch;
@@ -1017,5 +1003,19 @@ body.freezer-pane-open {
 
   .freezer-table {
     min-width: 760px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .freezer-grid {
+    grid-template-columns: 0.95fr 1.55fr 1fr;
+  }
+
+  .freezer-panel {
+    padding: 16px;
+  }
+
+  .freezer-summary-strip {
+    grid-template-columns: repeat(6, minmax(128px, 1fr));
   }
 }
