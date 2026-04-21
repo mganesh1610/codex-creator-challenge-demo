@@ -790,6 +790,40 @@ body.freezer-pane-open {
 .home-freezer-preview-row .freezer-tile {
   text-decoration: none;
   color: inherit;
+  min-height: 210px;
+  display: block;
+  align-content: normal;
+  gap: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 248, 243, 0.96));
+  box-shadow: 0 10px 22px rgba(58, 21, 31, 0.08);
+}
+
+.home-freezer-preview-row .freezer-tile-ribbon {
+  margin-bottom: 12px;
+  min-height: 0;
+  align-items: flex-start;
+}
+
+.home-freezer-preview-row .freezer-tile-reading {
+  display: block;
+  min-height: 0;
+}
+
+.home-freezer-preview-row .freezer-tile-name {
+  margin-top: 8px;
+  display: block;
+  min-height: 0;
+}
+
+.home-freezer-preview-row .freezer-tile-focus {
+  margin-top: 9px;
+  align-content: normal;
+  min-height: 0;
+}
+
+.home-freezer-preview-row .freezer-tile-meta {
+  margin-top: 8px;
+  align-self: auto;
 }
 
 .home-freezer-preview-row::-webkit-scrollbar {
