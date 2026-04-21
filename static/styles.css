@@ -2201,6 +2201,12 @@ input[type="text"] {
     padding: 0 0 32px;
   }
 
+  .workspace-bar-main {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 10px;
+    align-items: center;
+  }
+
   .workspace-bar {
     top: 0;
     padding: 10px 12px 10px;
@@ -2212,7 +2218,10 @@ input[type="text"] {
   }
 
   .workspace-brand {
+    grid-column: 1;
+    grid-row: 1;
     gap: 10px;
+    min-width: 0;
   }
 
   .workspace-brand-mark {
@@ -2228,10 +2237,14 @@ input[type="text"] {
 
   .workspace-brand-title {
     font-size: 0.98rem;
+    line-height: 1.04;
   }
 
   .workspace-mobile-menu {
     display: block;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
   }
 
   .workspace-nav {
@@ -2251,6 +2264,8 @@ input[type="text"] {
 
   .workspace-user-block {
     width: auto;
+    grid-column: 3;
+    grid-row: 1;
     justify-content: flex-end;
     justify-self: end;
   }
