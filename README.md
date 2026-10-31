@@ -19,3 +19,12 @@ Local run:
 ```bash
 python -m uvicorn app.main:app --reload
 ```
+
+Security checks:
+
+- Install `pre-commit` and `gitleaks`, then run `pre-commit install` to scan staged changes for secrets before each commit.
+- Run `gitleaks git --log-opts='--all' --redact=100` to scan the complete local Git history. A zero-match result is limited to patterns Gitleaks recognizes.
+- GitHub Actions runs Gitleaks, Trivy, and CodeQL on pull requests, pushes to `main`, and a weekly schedule. The review prompt is in [`.github/SECURITY_REVIEW.md`](.github/SECURITY_REVIEW.md).
+- Dependabot is configured to propose weekly Python dependency and GitHub Actions updates. Repository Dependabot alerts and security updates are managed in GitHub settings.
+
+`requirements.txt` contains version ranges and this repository has no lockfile or deployed dependency inventory. A zero-result Trivy filesystem scan therefore does not establish that the resolved deployment dependencies are free of known vulnerabilities.
